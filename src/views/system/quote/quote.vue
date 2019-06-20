@@ -1,0 +1,251 @@
+<template>
+  <div class="app-container">
+    <el-row :gutter="20">
+      <el-col :xs="17" :sm="18" :md="24" :lg="24" :xl="24">
+
+        <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
+          <el-form-item>
+            <el-input v-model="dataForm.userName" placeholder="车牌号" clearable />
+          </el-form-item>
+          <el-form-item>
+            <el-button @click="getDataList()">查询</el-button>
+            <!--        <el-button type="primary" @click="addOrUpdateHandle()">新增</el-button>-->
+            <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量删除</el-button>
+          </el-form-item>
+        </el-form>
+        <el-table
+          v-loading="dataListLoading"
+          :data="dataList"
+          border
+          style="width: 100%;"
+          @selection-change="selectionChangeHandle"
+        >
+          <el-table-column
+            type="selection"
+            header-align="center"
+            align="center"
+            width="50"
+          />
+          <el-table-column
+            prop="carNumber"
+            header-align="center"
+            align="center"
+            label="车牌号"
+          />
+          <el-table-column
+            prop="userName"
+            header-align="center"
+            align="center"
+            label="报价人"
+          />
+          <el-table-column
+            prop="mobile"
+            header-align="center"
+            align="center"
+            label="保险公司"
+          >
+            <template slot-scope="scope">
+              <p v-for="item in scope.row.quoteInfoList">{{ item.quoteInsuranceName }}</p>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="mobile"
+            header-align="center"
+            align="center"
+            label="报价状态"
+          >
+            <template slot-scope="scope">
+              <p v-for="item in scope.row.quoteInfoList">
+                <el-tag v-if="item.quoteStatus==1" size="small">报价成功</el-tag>
+                <el-tag v-else size="small" type="danger">报价失败</el-tag>
+              </p>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="invitecode"
+            header-align="center"
+            align="center"
+            label="核保状态"
+          >
+            <template slot-scope="scope">
+              <p v-for="item in scope.row.quoteInfoList">
+                <el-tag v-if="item.submitStatus==1" size="small">报价成功</el-tag>
+                <el-tag v-else size="small" type="danger">报价失败</el-tag>
+              </p>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="brandModel"
+            header-align="center"
+            align="center"
+            label="品牌型号"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="registerDate"
+            header-align="center"
+            align="center"
+            label="注册日期"
+          >
+          </el-table-column>
+          <el-table-column
+            prop="createdTime"
+            header-align="center"
+            align="center"
+            width="180"
+            label="创建时间"
+          >
+            <template slot-scope="scope">
+              {{ util.formatTime(scope.row.createdTime) }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            fixed="right"
+            header-align="center"
+            align="center"
+            width="150"
+            label="操作"
+          >
+            <template slot-scope="scope">
+              <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row)">查看</el-button>
+              <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.userId)">删除</el-button>
+            </template>
+          </el-table-column>
+        </el-table>
+        <el-pagination
+          :current-page="pageIndex"
+          :page-sizes="[10, 20, 50, 100]"
+          :page-size="pageSize"
+          :total="totalPage"
+          layout="total, sizes, prev, pager, next, jumper"
+          @size-change="sizeChangeHandle"
+          @current-change="currentChangeHandle"
+        />
+        <!-- 弹窗, 新增 / 修改 -->
+        <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList" />
+      </el-col>
+    </el-row>
+  </div>
+</template>
+
+<script>
+import { getCarInfoQuote } from '../../../api/userApi'
+export default {
+  components: {
+  },
+  data() {
+    return {
+      dataForm: {
+        userName: ''
+      },
+      dataList: [],
+      pageIndex: 1,
+      pageSize: 10,
+      totalPage: 0,
+      dataListLoading: false,
+      dataListSelections: [],
+      addOrUpdateVisible: false
+    }
+  },
+  activated() {
+    this.getUserList()
+  },
+  created() {
+    this.getUserList()
+  },
+  methods: {
+    getUserList() {
+      this.dataListLoading = true
+      const params = {
+        page: this.pageIndex,
+        size: this.pageSize * 10
+      }
+      getCarInfoQuote(params).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          this.dataList = res.data.list
+          this.totalPage = Math.ceil(res.data.total / 10)
+        } else {
+          this.dataList = []
+          this.totalPage = 0
+        }
+        this.dataListLoading = false
+      })
+    },
+    // 获取数据列表
+    getDataList() {
+      this.dataListLoading = true
+      this.$http({
+        url: this.$http.adornUrl('/sys/user/list'),
+        method: 'get',
+        params: this.$http.adornParams({
+          'page': this.pageIndex,
+          'limit': this.pageSize,
+          'username': this.dataForm.userName
+        })
+      }).then(({ data }) => {
+        if (data && data.code === 0) {
+          this.dataList = data.page.list
+          this.totalPage = data.page.totalCount
+        } else {
+          this.dataList = []
+          this.totalPage = 0
+        }
+        this.dataListLoading = false
+      })
+    },
+    // 每页数
+    sizeChangeHandle(val) {
+      this.pageSize = val
+      this.pageIndex = 1
+      this.getUserList()
+    },
+    // 当前页
+    currentChangeHandle(val) {
+      this.pageIndex = val
+      this.getUserList()
+    },
+    // 多选
+    selectionChangeHandle(val) {
+      this.dataListSelections = val
+    },
+    // 新增 / 修改
+    addOrUpdateHandle(e) {
+      this.addOrUpdateVisible = true
+      this.$nextTick(() => {
+        this.$refs.addOrUpdate.init(e)
+      })
+    },
+    // 删除
+    deleteHandle(id) {
+      var userIds = id ? [id] : this.dataListSelections.map(item => {
+        return item.userId
+      })
+      this.$confirm(`确定对[id=${userIds.join(',')}]进行[${id ? '删除' : '批量删除'}]操作?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        this.$http({
+          url: this.$http.adornUrl('/sys/user/delete'),
+          method: 'post',
+          data: this.$http.adornData(userIds, false)
+        }).then(({ data }) => {
+          if (data && data.code === 0) {
+            this.$message({
+              message: '操作成功',
+              type: 'success',
+              duration: 1500,
+              onClose: () => {
+                this.getDataList()
+              }
+            })
+          } else {
+            this.$message.error(data.msg)
+          }
+        })
+      }).catch(() => {})
+    }
+  }
+}
+</script>
