@@ -112,15 +112,17 @@ export default {
     },
     // 表单提交
     dataFormSubmit() {
+      let user=JSON.parse(this.$store.getters.user)
       this.visible = false
       const param = this.commission
+      param.updateBy=user.id
       delete param.createTime
       delete param.updateTime
       console.log(param)
       updateCommission(param).then(res => {
         console.log(res)
         if (res.code === 200) {
-          this.$message({
+          this.$notify({
             message: '操作成功',
             type: 'success'
           })

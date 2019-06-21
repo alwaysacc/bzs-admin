@@ -15,21 +15,16 @@
           <i class="el-icon-caret-bottom"/>
         </div>
         <el-dropdown-menu slot="dropdown">
-          <a target="_blank" href="https://docs.auauz.net/">
-            <el-dropdown-item>
-              项目文档
-            </el-dropdown-item>
-          </a>
           <span style="display:block;" @click="show = true">
             <el-dropdown-item>
               布局设置
             </el-dropdown-item>
           </span>
-          <router-link to="/user/center">
+          <span style="display:block;" @click="dialog=true">
             <el-dropdown-item>
-              个人中心
+              修改密码
             </el-dropdown-item>
-          </router-link>
+          </span>
           <span style="display:block;" @click="open">
             <el-dropdown-item divided>
               退出登录
@@ -37,6 +32,26 @@
           </span>
         </el-dropdown-menu>
       </el-dropdown>
+      <el-dialog
+        :visible.sync="dialog"
+        :modal-append-to-body="false"
+        title="修改密码"
+        top="1vh"
+        width="500px"
+      >
+        <el-form ref="ruleForm" :model="ruleForm" :rules="rules" status-icon label-width="100px" class="demo-ruleForm">
+          <el-form-item label="新密码" prop="pass">
+            <el-input v-model="ruleForm.pass" type="password" autocomplete="off"/>
+          </el-form-item>
+          <el-form-item label="确认密码" prop="checkPass">
+            <el-input v-model="ruleForm.checkPass" type="password" autocomplete="off"/>
+          </el-form-item>
+        </el-form>
+        <span slot="footer" class="dialog-footer">
+          <el-button @click="dialog = false">取消</el-button>
+          <el-button type="primary" @click="dataFormSubmit()">确定</el-button>
+        </span>
+      </el-dialog>
     </div>
   </div>
 </template>
@@ -46,6 +61,7 @@ import { mapGetters } from 'vuex'
 import Breadcrumb from '@/components/Breadcrumb'
 import Hamburger from '@/components/Hamburger'
 import Screenfull from '@/components/Screenfull'
+import { updateAdmin } from '../../../api/userApi'
 
 export default {
   components: {
@@ -54,8 +70,43 @@ export default {
     Screenfull
   },
   data() {
+    var validatePass = (rule, value, callback) => {
+      console.log(value)
+      if (value === '') {
+        callback(new Error('请输入密码'))
+      } else if (value.length < 6) {
+        callback(new Error('密码不得小于6位'))
+      } else {
+        if (this.ruleForm.checkPass !== '') {
+          this.$refs.ruleForm.validateField('checkPass')
+        }
+        callback()
+      }
+    }
+    var validatePass2 = (rule, value, callback) => {
+      if (value === '') {
+        callback(new Error('请再次输入密码'))
+      } else if (value !== this.ruleForm.pass) {
+        callback(new Error('两次输入密码不一致!'))
+      } else {
+        callback()
+      }
+    }
     return {
-      dialogVisible: false
+      dialog: false,
+      dialogVisible: false,
+      ruleForm: {
+        pass: '',
+        checkPass: ''
+      },
+      rules: {
+        pass: [
+          { validator: validatePass, trigger: 'blur' }
+        ],
+        checkPass: [
+          { validator: validatePass2, trigger: 'blur' }
+        ]
+      }
     }
   },
   computed: {
@@ -77,6 +128,24 @@ export default {
     }
   },
   methods: {
+    dataFormSubmit() {
+      const user = JSON.parse(this.$store.getters.user)
+      const param = {
+        id: user.id,
+        loginPwd: this.ruleForm.pass,
+        loginName: user.loginName
+      }
+      updateAdmin(param).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          this.$notify({
+            title: '操作成功',
+            type: 'success'
+          })
+        }
+        this.dialog = false
+      })
+    },
     open() {
       this.$confirm('确定注销并退出系统吗？', '提示', {
         confirmButtonText: '确定',

@@ -35,6 +35,7 @@ export const constantRouterMap = [
     component: () => import('@/views/errorPage/401'),
     hidden: true
   },
+
   {
     path: '/redirect',
     component: Layout,
@@ -43,6 +44,34 @@ export const constantRouterMap = [
       {
         path: '/redirect/:path*',
         component: () => import('@/views/redirect/index')
+      }
+    ]
+  },
+  {
+    path: '/',
+    component: Layout,
+    hidden: true,
+    redirect: 'quoteDetail',
+    children: [
+      {
+        path: 'quoteDetail',
+        component: () => import('@/views/system/quote/quoteDetail'),
+        name: '报价详情',
+        meta: { title: '报价详情', icon: 'index', noCache: false, affix: false }
+      }
+    ]
+  },
+  {
+    path: '/',
+    component: Layout,
+    hidden: true,
+    redirect: 'orderDetail',
+    children: [
+      {
+        path: 'orderDetail',
+        component: () => import('@/views/system/order/orderDetail'),
+        name: '订单详情',
+        meta: { title: '订单详情', icon: 'index', noCache: false, affix: false }
       }
     ]
   },

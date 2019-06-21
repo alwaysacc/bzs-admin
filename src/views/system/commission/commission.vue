@@ -72,7 +72,7 @@
             </template>
           </el-table-column>
           <el-table-column
-            prop="updateTime"
+            prop="name"
             header-align="center"
             align="center"
             width="180"
@@ -86,7 +86,7 @@
             label="操作"
           >
             <template slot-scope="scope">
-              <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row)">修改</el-button>
+              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdateHandle(scope.row)"></el-button>
             </template>
           </el-table-column>
         </el-table>

@@ -2,15 +2,14 @@
   <div class="app-container">
     <div class="head-container">
       <!-- 搜索 -->
-      <el-input v-model="query.value" clearable placeholder="输入名称搜索" style="width: 200px;" class="filter-item" @keyup.enter.native="toQuery"/>
-      <el-button class="filter-item" size="mini" type="success" icon="el-icon-search" @click="toQuery">搜索</el-button>
+      <el-button class="filter-item" size="mini" type="success" icon="el-icon-search" @click="toQuery">下载模板</el-button>
       <!-- 新增 -->
       <div v-permission="['ADMIN','ROLES_ALL','ROLES_CREATE']" style="display: inline-block;margin: 0px 2px;">
         <el-button
           class="filter-item"
           type="primary"
           icon="el-icon-plus"
-          @click="addOrUpdate">新增</el-button>
+          @click="addOrUpdate">上传</el-button>
         <eForm ref="form" :is-add="true"/>
       </div>
       <el-dialog
@@ -20,12 +19,13 @@
         top="1vh"
         width="500px"
       >
-        <el-form ref="dataForm" :model="dataForm" :rules="rules" status-icon label-width="80px" @keyup.enter.native="dataFormSubmit()">
-          <el-form-item label="姓名" prop="name">
+        <el-form ref="dataForm" :model="dataForm" :rules="dataRule" label-width="80px" @keyup.enter.native="dataFormSubmit()">
+
+          <el-form-item label="姓名" prop="userName">
             <el-input v-model="dataForm.name" placeholder="登录帐号" />
           </el-form-item>
           <el-form-item label="账号" prop="loginName">
-            <el-input v-model="dataForm.loginName" :disabled="!isAdd" autocomplete="off" placeholder="登录帐号" @blur="checkLoginName"/>
+            <el-input v-model="dataForm.loginName" placeholder="登录帐号" />
           </el-form-item>
           <el-form-item label="密码" prop="loginPwd">
             <el-input v-model="dataForm.loginPwd" type="password" placeholder="密码" />
@@ -83,33 +83,33 @@
             prop="name"
             header-align="center"
             align="center"
-            label="姓名"
+            label="名字"
           />
           <el-table-column
             prop="mobile"
             header-align="center"
             align="center"
             width="100"
-            label="手机"
+            label="批次"
           />
           <el-table-column
             prop="loginName"
             header-align="center"
             align="center"
-            label="账号"
+            label="创建时间"
           />
           <el-table-column
             prop="role_name"
             header-align="center"
             align="center"
-            label="角色"
+            label="创建人"
           />
           <el-table-column
             prop="superiorinvitecode"
             header-align="center"
             align="center"
             width="180"
-            label="创建时间"
+            label="爬取方式"
           >
             <template slot-scope="scope">
               {{ util.formatTime(scope.row.create_time) }}
@@ -131,12 +131,19 @@
             header-align="center"
             align="center"
             width="180"
-            label="最后登录时间"
+            label="最后一次爬取ID"
           >
             <template slot-scope="scope">
               {{ util.formatTime(scope.row.last_login_time) }}
             </template>
           </el-table-column>
+          <el-table-column
+            prop="createdTime"
+            header-align="center"
+            align="center"
+            width="180"
+            label="完成数量"
+          ></el-table-column>
           <el-table-column
             fixed="right"
             header-align="center"
@@ -145,7 +152,7 @@
             label="操作"
           >
             <template slot-scope="scope">
-              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdate(scope.row)"/>
+              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdate(scope.row)"></el-button>
               <el-popover
                 :ref="scope.row.id"
                 placement="top"
@@ -155,7 +162,7 @@
                   <el-button size="mini" type="text" @click="$refs[scope.row.id].doClose()">取消</el-button>
                   <el-button type="primary" size="mini" @click="deleteAdmin(scope.row.id)">确定</el-button>
                 </div>
-                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
+                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"></el-button>
               </el-popover>
             </template>
           </el-table-column>
@@ -175,67 +182,26 @@
 </template>
 
 <script>
-import { getAdminList, getRoleList, saveAdmin, deleteAdmin, updateAdmin,
-  checkAdminLoginName
-} from '../../../api/userApi'
+import { getAdminList, getRoleList, saveAdmin, deleteAdmin, updateAdmin } from '../../api/userApi'
 export default {
   components: {
   },
   data() {
-    var checkLoginName = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入账号'))
-      } else if (value.length < 6) {
-        callback(new Error('账号不得小于6位'))
-        console.log(this.errMsg)
-      } else if (this.errMsg) {
-        callback()
-      } else {
-        callback(new Error('账号已存在'))
-      }
-    }
     return {
-      dataForm: {
-        name: '',
-        loginName: '',
-        pass: ''
-      },
       dateScopes: ['全部', '本级', '自定义'],
       loading: false, dialog: false, depts: [], deptIds: [],
       form: { name: '', depts: [], remark: '', dataScope: '本级', level: 3 },
       rules: {
-        loginName: [
-          { required: true, validator: checkLoginName, trigger: 'blur' }
-        ],
-        name:
-          [{ required: true, message: '请输入用户名', trigger: 'blur' },
-            { min: 2, max: 7, message: '长度在 2 到 7 个字符' },
-            { pattern: /^[\u4E00-\u9FA5]+$/, message: '用户名只能为中文' }
-          ],
-        loginPwd:
-          [{ required: true, message: '请输入密码', trigger: 'blur' },
-            { min: 5, max: 25, message: '长度在 5 到 25个字符' },
-            { pattern: /^(\w){5,25}$/, message: '只能输入5-25个字母、数字、下划线' }
-          ],
-        mobile:
-          [{ required: true, message: '请输入手机号码', trigger: 'blur' },
-            {
-              validator: function(rule, value, callback) {
-                if (/^1[34578]\d{9}$/.test(value) == false) {
-                  callback(new Error('请输入正确的手机号'))
-                } else {
-                  callback()
-                }
-              }, trigger: 'blur'
-            }],
-        roleIdList:
-          [{ required: true, message: '必选', trigger: 'blur' }],
-        status:
-          [{ required: true, message: '必选', trigger: 'blur' }]
+        name: [
+          { required: true, message: '请输入名称', trigger: 'blur' }
+        ]
       },
       visible: false,
       query: {
         value: ''
+      },
+      dataForm: {
+        userName: ''
       },
       dataList: [],
       pageIndex: 1,
@@ -245,9 +211,7 @@ export default {
       dataListSelections: [],
       addOrUpdateVisible: false,
       roleList: {},
-      isAdd: true,
-      errMsg: true,
-      stat: 0
+      isAdd: true
     }
   },
   activated() {
@@ -276,47 +240,31 @@ export default {
       })
     },
     dataFormSubmit() {
-      this.$refs['dataForm'].validate((valid) => {
-        if (valid) {
-          if (this.isAdd) {
-            const param = this.dataForm
-            saveAdmin(param).then(res => {
-              if (res.code === 200) {
-                this.$notify({
-                  title: '操作成功',
-                  type: 'success'
-                })
-              }
-              this.getAdminList()
+      if (this.isAdd) {
+        const param = this.dataForm
+        saveAdmin(param).then(res => {
+          if (res.code === 200) {
+            this.$notify({
+              title: '操作成功',
+              type: 'success'
             })
-            this.dialog = false
-          } else {
-            const param = this.dataForm
-            updateAdmin(param).then(res => {
-              if (res.code === 200) {
-                this.$notify({
-                  title: '操作成功',
-                  type: 'success'
-                })
-              }
-              this.getAdminList()
-            })
-            this.dialog = false
           }
-        }else {
-          return false
-        }
-      })
-    },
-    checkLoginName() {
-      const param = {
-        loginName: this.dataForm.loginName
+          this.getAdminList()
+        })
+        this.dialog = false
+      } else {
+        const param = this.dataForm
+        updateAdmin(param).then(res => {
+          if (res.code === 200) {
+            this.$notify({
+              title: '操作成功',
+              type: 'success'
+            })
+          }
+          this.getAdminList()
+        })
+        this.dialog = false
       }
-      checkAdminLoginName(param).then(res => {
-        if (!res) {
-          this.errMsg = false
-        }
-      })
     },
     // 每页数
     sizeChangeHandle(val) {
@@ -334,11 +282,6 @@ export default {
       this.dataListSelections = val
     },
     addOrUpdate(e) {
-      if (this.stat == 0) {
-        this.stat = this.stat + 1
-      } else {
-        this.$refs['dataForm'].clearValidate()
-      }
       if (e.id) {
         this.getRoleList()
         this.dialog = true

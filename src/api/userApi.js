@@ -13,6 +13,9 @@ export const updateUser = (params) => {
 export const deleteUser = (params) => {
   return http.fetchPost('/account/info/deleteUser', params)
 }
+export const checkUserLoginName = (params) => {
+  return http.fetchPost('/account/info/checkUserLoginName', params)
+}
 // 管理员
 export const adminLogin = (params) => {
   return http.fetchPost('/admin/login', params)
@@ -28,6 +31,9 @@ export const deleteAdmin = (params) => {
 }
 export const updateAdmin = (params) => {
   return http.fetchPost('/admin/updateAdmin', params)
+}
+export const checkAdminLoginName = (params) => {
+  return http.fetchPost('/admin/checkAdminLoginName', params)
 }
 // 角色
 export const getRoleList = (params) => {
@@ -45,6 +51,9 @@ export const updateRole = (params) => {
 // 订单
 export const getOrderList = (params) => {
   return http.fetchPost('/orderinfo/getOrderList', params)
+}
+export const getOrderDetails = (params) => {
+  return http.fetchPost('/orderinfo/getOrderDetail', params)
 }
 
 export const getListByAdmin = (params) => {
@@ -74,4 +83,7 @@ export const getMenuIdByRoleId = (params) => {
 // 报价记录
 export const getCarInfoQuote = (params) => {
   return http.fetchPost('/carinfo/getCarInfoQuote', params)
+}
+export const quoteDetails = (params) => {
+  return http.fetchPost('/quoteinfo/quoteDetails', params)
 }

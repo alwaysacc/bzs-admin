@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
+        <el-form :inline="true" :model="userName" @keyup.enter.native="getDataList()">
           <el-form-item>
             <el-input v-model="userName" placeholder="用户名" clearable />
           </el-form-item>
@@ -19,13 +19,13 @@
           top="1vh"
           width="500px"
         >
-          <el-form ref="dataForm" :model="dataForm" :rules="dataRule" label-width="80px" @keyup.enter.native="dataFormSubmit()">
+          <el-form ref="dataForm" :model="dataForm" :rules="rules" label-width="80px" @keyup.enter.native="dataFormSubmit()">
 
             <el-form-item label="姓名" prop="userName">
               <el-input v-model="dataForm.userName" placeholder="登录帐号" />
             </el-form-item>
             <el-form-item label="账号" prop="loginName">
-              <el-input v-model="dataForm.loginName" placeholder="登录帐号" />
+              <el-input v-model="dataForm.loginName" placeholder="登录帐号" @blur="checkLoginName"/>
             </el-form-item>
             <el-form-item :class="{ 'is-required': !dataForm.id }" label="密码" prop="loginPwd">
               <el-input v-model="dataForm.loginPwd" type="password" placeholder="密码" />
@@ -200,14 +200,55 @@
 </template>
 
 <script>
-import { getUserList, deleteUser, saveUser, updateUser } from '../../../api/userApi'
+import { getUserList, deleteUser, saveUser, updateUser ,checkUserLoginName} from '../../../api/userApi'
 export default {
   components: {
   },
   data() {
+    var checkLoginName = (rule, value, callback) => {
+      if (!value) {
+        callback(new Error('请输入账号'))
+      } else if (value.length < 6) {
+        callback(new Error('账号不得小于6位'))
+      } else if (this.errMsg) {
+        callback()
+      } else {
+        callback(new Error('账号已存在'))
+      }
+    }
     return {
       dataForm: {
         userName: ''
+      },
+      rules: {
+        loginName: [
+          { required: true, validator: checkLoginName, trigger: 'blur' }
+        ],
+        userName:
+          [{ required: true, message: '请输入用户名', trigger: 'blur' },
+            { min: 2, max: 7, message: '长度在 2 到 7 个字符' },
+            { pattern: /^[\u4E00-\u9FA5]+$/, message: '用户名只能为中文' }
+          ],
+        loginPwd:
+          [{ required: true, message: '请输入密码', trigger: 'blur' },
+            { min: 5, max: 25, message: '长度在 5 到 25个字符' },
+            { pattern: /^(\w){5,25}$/, message: '只能输入5-25个字母、数字、下划线' }
+          ],
+        mobile:
+          [{ required: true, message: '请输入手机号码', trigger: 'blur' },
+            {
+              validator: function(rule, value, callback) {
+                if (/^1[34578]\d{9}$/.test(value) == false) {
+                  callback(new Error('请输入正确的手机号'))
+                } else {
+                  callback()
+                }
+              }, trigger: 'blur'
+            }],
+        roleIdList:
+          [{ required: true, message: '必选', trigger: 'blur' }],
+        status:
+          [{ required: true, message: '必选', trigger: 'blur' }]
       },
       dataList: [],
       pageIndex: 1,
@@ -218,7 +259,9 @@ export default {
       addOrUpdateVisible: false,
       isAdd: true,
       dialog: false,
-      userName: ''
+      userName: '',
+      errMsg:true,
+      stat:0
     }
   },
   activated() {
@@ -246,8 +289,22 @@ export default {
         this.dataListLoading = false
       })
     },
+    checkLoginName() {
+      const param = {
+        loginName: this.dataForm.loginName
+      }
+      checkUserLoginName(param).then(res => {
+        if (!res) {
+          this.errMsg = false
+        }
+      })
+    },
     addOrUpdate(e) {
-      console.log(e)
+      if (this.stat == 0) {
+        this.stat = this.stat + 1
+      } else {
+        this.$refs['dataForm'].clearValidate()
+      }
       if (e.account_id) {
         this.dialog = true
         this.isAdd = false

@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-row :gutter="20">
-      <el-col :xs="17" :sm="18" :md="24" :lg="24" :xl="24">
+      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
         <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
           <el-form-item>
             <el-input v-model="dataForm.userName" placeholder="车牌号" clearable />
@@ -110,9 +110,20 @@
             width="150"
             label="操作"
           >
+
             <template slot-scope="scope">
-              <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row)">查看</el-button>
-              <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.userId)">删除</el-button>
+              <el-button type="primary" class="el-icon-view" size="small" @click="getOrderDetail(scope.row.order_id)"/>
+              <el-popover
+                :ref="scope.row.order_id"
+                placement="top"
+                width="160">
+                <p>确定删除吗？</p>
+                <div style="text-align: right; margin: 0">
+                  <el-button size="mini" type="text" @click="$refs[scope.row.order_id].doClose()">取消</el-button>
+                  <el-button type="primary" size="mini" @click="deleteAdmin(scope.row.id)">确定</el-button>
+                </div>
+                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
+              </el-popover>
             </template>
           </el-table-column>
         </el-table>
@@ -158,6 +169,9 @@ export default {
     this.getOrderList()
   },
   methods: {
+    getOrderDetail(e){
+      this.$router.push({ path: '/orderDetail', query: { order_id: e }})
+    },
     getOrderList() {
       this.dataListLoading = true
       const params = {

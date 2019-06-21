@@ -1,17 +1,17 @@
 <template>
   <div class="app-container">
     <el-row :gutter="20">
-      <el-col :xs="17" :sm="18" :md="24" :lg="24" :xl="24">
+      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
 
         <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
           <el-form-item>
             <el-input v-model="dataForm.userName" placeholder="车牌号" clearable />
           </el-form-item>
-          <el-form-item>
+          <!--    <el-form-item>
             <el-button @click="getDataList()">查询</el-button>
-            <!--        <el-button type="primary" @click="addOrUpdateHandle()">新增</el-button>-->
+            &lt;!&ndash;        <el-button type="primary" @click="addOrUpdateHandle()">新增</el-button>&ndash;&gt;
             <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量删除</el-button>
-          </el-form-item>
+          </el-form-item>-->
         </el-form>
         <el-table
           v-loading="dataListLoading"
@@ -79,15 +79,13 @@
             header-align="center"
             align="center"
             label="品牌型号"
-          >
-          </el-table-column>
+          />
           <el-table-column
             prop="registerDate"
             header-align="center"
             align="center"
             label="注册日期"
-          >
-          </el-table-column>
+          />
           <el-table-column
             prop="createdTime"
             header-align="center"
@@ -107,8 +105,18 @@
             label="操作"
           >
             <template slot-scope="scope">
-              <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row)">查看</el-button>
-              <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.userId)">删除</el-button>
+              <el-button type="primary" class="el-icon-view" size="small" @click="getQuoteDetail(scope.row.carInfoId)"/>
+              <el-popover
+                :ref="scope.row.carInfoId"
+                placement="top"
+                width="160">
+                <p>确定删除吗？</p>
+                <div style="text-align: right; margin: 0">
+                  <el-button size="mini" type="text" @click="$refs[scope.row.carInfoId].doClose()">取消</el-button>
+                  <el-button type="primary" size="mini" @click="deleteAdmin(scope.row.id)">确定</el-button>
+                </div>
+                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
+              </el-popover>
             </template>
           </el-table-column>
         </el-table>
@@ -121,7 +129,31 @@
           @size-change="sizeChangeHandle"
           @current-change="currentChangeHandle"
         />
-        <!-- 弹窗, 新增 / 修改 -->
+        <!--  <el-dialog :visible.sync="dialogVisible" title="报价详情" append-to-body top="0" width="1000px">
+          <div>
+            <el-tabs v-model="activeName" tab-position="left" @tab-click="handleClick">
+              <el-tab-pane label="车辆信息" name="first">
+                <el-row type="flex" class="row-bg">
+                  <el-col :span="6">车牌号：{{map.carInfo.carNumber}}</el-col>
+                  <el-col :span="5">发动机号：{{map.carInfo.engineNumber}}</el-col>
+                  <el-col :span="7">车架号：{{map.carInfo.frameNumber}}</el-col>
+                  <el-col :span="6">注册日期：{{map.carInfo.registerDate}}</el-col>
+                </el-row>
+                <el-row type="flex" class="row-bg">
+                  <el-col :span="6">品牌型号：{{map.carInfo.brandModel}}</el-col>
+                  <el-col :span="5">发动机号：{{map.carInfo.engineNumber}}</el-col>
+                  <el-col :span="7">车架号：{{map.carInfo.frameNumber}}</el-col>
+                  <el-col :span="6">注册日期：{{map.carInfo.registerDate}}</el-col>
+                </el-row>
+              </el-tab-pane>
+              <el-tab-pane label="配置管理" name="second">配置管理</el-tab-pane>
+              <el-tab-pane label="角色管理" name="third">角色管理</el-tab-pane>
+              <el-tab-pane label="定时任务补偿" name="fourth">定时任务补偿</el-tab-pane>
+            </el-tabs>
+
+          </div>
+        </el-dialog>
+     -->   <!-- 弹窗, 新增 / 修改 -->
         <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList" />
       </el-col>
     </el-row>
@@ -129,7 +161,7 @@
 </template>
 
 <script>
-import { getCarInfoQuote } from '../../../api/userApi'
+import { getCarInfoQuote, quoteDetails } from '../../../api/userApi'
 export default {
   components: {
   },
@@ -144,7 +176,10 @@ export default {
       totalPage: 0,
       dataListLoading: false,
       dataListSelections: [],
-      addOrUpdateVisible: false
+      addOrUpdateVisible: false,
+      dialogVisible: false,
+      activeName: 'first',
+      map: {}
     }
   },
   activated() {
@@ -154,6 +189,12 @@ export default {
     this.getUserList()
   },
   methods: {
+    getQuoteDetail(e) {
+      this.$router.push({ path: '/quoteDetail', query: { car_info_id: e }})
+    },
+    handleClick(tab, event) {
+      console.log(tab, event)
+    },
     getUserList() {
       this.dataListLoading = true
       const params = {
