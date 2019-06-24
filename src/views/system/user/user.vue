@@ -25,7 +25,7 @@
               <el-input v-model="dataForm.userName" placeholder="登录帐号" />
             </el-form-item>
             <el-form-item label="账号" prop="loginName">
-              <el-input v-model="dataForm.loginName" placeholder="登录帐号" @blur="checkLoginName"/>
+              <el-input v-model="dataForm.loginName" :disabled="!isAdd" placeholder="登录帐号" @blur="checkLoginName"/>
             </el-form-item>
             <el-form-item :class="{ 'is-required': !dataForm.id }" label="密码" prop="loginPwd">
               <el-input v-model="dataForm.loginPwd" type="password" placeholder="密码" />
@@ -168,7 +168,7 @@
             label="操作"
           >
             <template slot-scope="scope">
-              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdate(scope.row)"></el-button>
+              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdate(scope.row)"/>
               <el-popover
                 :ref="scope.row.id"
                 placement="top"
@@ -178,7 +178,7 @@
                   <el-button size="mini" type="text" @click="$refs[scope.row.account_id].doClose()">取消</el-button>
                   <el-button type="primary" size="mini" @click="deleteUser(scope.row.account_id)">确定</el-button>
                 </div>
-                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"></el-button>
+                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
               </el-popover>
             </template>
           </el-table-column>
@@ -192,29 +192,29 @@
           @size-change="sizeChangeHandle"
           @current-change="currentChangeHandle"
         />
-        <!-- 弹窗, 新增 / 修改 -->
-        <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getUserList" />
       </el-col>
     </el-row>
   </div>
 </template>
 
 <script>
-import { getUserList, deleteUser, saveUser, updateUser ,checkUserLoginName} from '../../../api/userApi'
+import { getUserList, deleteUser, saveUser, updateUser, checkUserLoginName } from '../../../api/userApi'
 export default {
   components: {
   },
   data() {
     var checkLoginName = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入账号'))
-      } else if (value.length < 6) {
-        callback(new Error('账号不得小于6位'))
-      } else if (this.errMsg) {
-        callback()
-      } else {
-        callback(new Error('账号已存在'))
+      const param = {
+        loginName: this.dataForm.loginName
       }
+      const c = callback
+      checkUserLoginName(param).then(res => {
+        if (res) {
+          c(new Error('账号已存在'))
+        } else {
+          c()
+        }
+      })
     }
     return {
       dataForm: {
@@ -222,6 +222,8 @@ export default {
       },
       rules: {
         loginName: [
+          { required: true, message: '请输入账号', trigger: 'blur' },
+          { min: 5, max: 16, message: '长度在 5 到 16 个字符' },
           { required: true, validator: checkLoginName, trigger: 'blur' }
         ],
         userName:
@@ -260,8 +262,8 @@ export default {
       isAdd: true,
       dialog: false,
       userName: '',
-      errMsg:true,
-      stat:0
+      errMsg: true,
+      stat: 0
     }
   },
   activated() {
@@ -300,7 +302,7 @@ export default {
       })
     },
     addOrUpdate(e) {
-      if (this.stat == 0) {
+      if (this.stat === 0) {
         this.stat = this.stat + 1
       } else {
         this.$refs['dataForm'].clearValidate()
@@ -318,31 +320,35 @@ export default {
       }
     },
     dataFormSubmit() {
-      if (this.isAdd) {
-        const param = this.dataForm
-        saveUser(param).then(res => {
-          if (res.code === 200) {
-            this.$notify({
-              title: '操作成功',
-              type: 'success'
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          if (this.isAdd) {
+            const param = this.dataForm
+            saveUser(param).then(res => {
+              if (res.code === 200) {
+                this.$notify({
+                  title: '操作成功',
+                  type: 'success'
+                })
+              }
+              this.getUserList()
             })
-          }
-          this.getUserList()
-        })
-        this.dialog = false
-      } else {
-        const param = this.dataForm
-        updateUser(param).then(res => {
-          if (res.code === 200) {
-            this.$notify({
-              title: '操作成功',
-              type: 'success'
+            this.dialog = false
+          } else {
+            const param = this.dataForm
+            updateUser(param).then(res => {
+              if (res.code === 200) {
+                this.$notify({
+                  title: '操作成功',
+                  type: 'success'
+                })
+              }
+              this.getUserList()
             })
+            this.dialog = false
           }
-          this.getUserList()
-        })
-        this.dialog = false
-      }
+        }
+      })
     },
     // 每页数
     sizeChangeHandle(val) {

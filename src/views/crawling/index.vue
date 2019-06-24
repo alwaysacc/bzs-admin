@@ -1,63 +1,66 @@
 <template>
   <div class="app-container">
-    <div class="head-container">
-      <!-- 搜索 -->
-      <el-button class="filter-item" size="mini" type="success" icon="el-icon-search" @click="toQuery">下载模板</el-button>
-      <!-- 新增 -->
-      <div v-permission="['ADMIN','ROLES_ALL','ROLES_CREATE']" style="display: inline-block;margin: 0px 2px;">
-        <el-button
-          class="filter-item"
-          type="primary"
-          icon="el-icon-plus"
-          @click="addOrUpdate">上传</el-button>
-        <eForm ref="form" :is-add="true"/>
+    <div style="display: flex">
+      <div class="head-container">
+        <!-- 搜索 -->
+        <el-button class="filter-item" size="mini" type="success" @click="toDownload">下载模板</el-button>
+        <div style="display: inline-block;margin: 0px 2px;">
+          <el-button class="filter-item" size="mini" type="primary" @click="dialog = true">点击上传</el-button>
+        </div>
       </div>
+      <!-- 搜索 -->
+
+      <!-- 新增
+        <div v-permission="['ADMIN','ROLES_ALL','ROLES_CREATE']" style="display: inline-block;margin: 0px 2px;">
+          <el-button
+            class="filter-item"
+            type="primary"
+            icon="el-icon-plus"
+            @click="addOrUpdate">上传</el-button>
+          <eForm ref="form" :is-add="true"/>
+        </div>-->
       <el-dialog
-        :title="isAdd ? '新增' : '修改'"
         :visible.sync="dialog"
         :modal-append-to-body="false"
+        title="选择文件"
         top="1vh"
         width="500px"
       >
         <el-form ref="dataForm" :model="dataForm" :rules="dataRule" label-width="80px" @keyup.enter.native="dataFormSubmit()">
-
-          <el-form-item label="姓名" prop="userName">
-            <el-input v-model="dataForm.name" placeholder="登录帐号" />
-          </el-form-item>
-          <el-form-item label="账号" prop="loginName">
-            <el-input v-model="dataForm.loginName" placeholder="登录帐号" />
-          </el-form-item>
-          <el-form-item label="密码" prop="loginPwd">
-            <el-input v-model="dataForm.loginPwd" type="password" placeholder="密码" />
-          </el-form-item>
-          <!--      <el-form-item label="邮箱" prop="email">
-            <el-input v-model="dataForm.email" placeholder="邮箱"></el-input>
-          </el-form-item>-->
-          <el-form-item label="手机号" prop="mobile">
-            <el-input v-model="dataForm.mobile" placeholder="手机号" />
-          </el-form-item>
-          <el-form-item label="角色" size="mini" prop="roleIdList">
-            <el-select v-model="dataForm.roleId" style="width:100%;" placeholder="请选择">
-              <el-option
-                v-for="(item, index) in roleList"
-                :key="item.name + index"
-                :label="item.name"
-                :value="item.id"/>
-            </el-select>
-          </el-form-item>
-          <el-form-item label="状态" size="mini" prop="status">
-            <el-radio-group v-model="dataForm.status">
-              <el-radio :label="0">正常</el-radio>
-              <el-radio :label="1">禁用</el-radio>
+          <el-form-item label="爬取方式">
+            <el-radio-group v-model="dataForm.resource">
+              <el-radio label="车牌号"/>
+              <el-radio label="车架号"/>
             </el-radio-group>
           </el-form-item>
+          <el-form-item label="选择文件">
+            <el-upload
+              ref="upload"
+              :on-preview="handlePreview"
+              :on-remove="handleRemove"
+              :on-success="onSuccess"
+              :on-error="onError"
+              :before-remove="beforeRemove"
+              :limit="3"
+              :on-exceed="handleExceed"
+              :file-list="fileList"
+              :auto-upload="false"
+              show-file-list="false"
+              class="upload-demo"
+              action="https://jsonplaceholder.typicode.com/posts/"
+              multiple>
+              <el-button class="filter-item" size="mini" type="primary">点击上传</el-button>
+            </el-upload>
+          </el-form-item>
+          <div style="display: inline-block;margin: 0px 2px;"/>
         </el-form>
         <span slot="footer" class="dialog-footer">
           <el-button @click="dialog = false">取消</el-button>
-          <el-button type="primary" @click="dataFormSubmit()">确定</el-button>
+          <el-button style="margin-left: 10px;" size="small" type="primary" @click="submitUpload">开始上传</el-button>
         </span>
       </el-dialog>
     </div>
+
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
         <el-table
@@ -69,15 +72,10 @@
           @selection-change="selectionChangeHandle"
         >
           <el-table-column
-            type="selection"
-            header-align="center"
+            prop="id"
+            width="50"
             align="center"
-            width="50"
-          />
-          <el-table-column
-            type="index"
-            width="50"
-            label="ID"
+            label="批次"
           />
           <el-table-column
             prop="name"
@@ -86,24 +84,21 @@
             label="名字"
           />
           <el-table-column
-            prop="mobile"
-            header-align="center"
-            align="center"
-            width="100"
-            label="批次"
-          />
-          <el-table-column
             prop="loginName"
             header-align="center"
             align="center"
             label="创建时间"
-          />
-          <el-table-column
+          >
+            <template slot-scope="scope">
+              {{ util.formatTime(scope.row.createTime) }}
+            </template>
+          </el-table-column>
+          <!--          <el-table-column
             prop="role_name"
             header-align="center"
             align="center"
             label="创建人"
-          />
+          />-->
           <el-table-column
             prop="superiorinvitecode"
             header-align="center"
@@ -112,7 +107,7 @@
             label="爬取方式"
           >
             <template slot-scope="scope">
-              {{ util.formatTime(scope.row.create_time) }}
+              {{ scope.row.type=='1'?'车牌号':'车架号' }}
             </template>
           </el-table-column>
           <el-table-column
@@ -122,28 +117,18 @@
             label="状态"
           >
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.status != '0'" size="small" type="danger">禁用</el-tag>
-              <el-tag v-else size="small">正常</el-tag>
+              <el-tag v-if="scope.row.status == '0'" size="small" type="danger">未爬取</el-tag>
+              <el-tag v-else-if="scope.row.status == '1'" size="small">完成</el-tag>
+              <el-tag v-else size="small">正在爬取</el-tag>
             </template>
           </el-table-column>
           <el-table-column
-            prop="createdTime"
+            prop="total"
             header-align="center"
             align="center"
             width="180"
-            label="最后一次爬取ID"
-          >
-            <template slot-scope="scope">
-              {{ util.formatTime(scope.row.last_login_time) }}
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="createdTime"
-            header-align="center"
-            align="center"
-            width="180"
-            label="完成数量"
-          ></el-table-column>
+            label="总数"
+          />
           <el-table-column
             fixed="right"
             header-align="center"
@@ -152,18 +137,9 @@
             label="操作"
           >
             <template slot-scope="scope">
-              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdate(scope.row)"></el-button>
-              <el-popover
-                :ref="scope.row.id"
-                placement="top"
-                width="160">
-                <p>确定删除吗？</p>
-                <div style="text-align: right; margin: 0">
-                  <el-button size="mini" type="text" @click="$refs[scope.row.id].doClose()">取消</el-button>
-                  <el-button type="primary" size="mini" @click="deleteAdmin(scope.row.id)">确定</el-button>
-                </div>
-                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"></el-button>
-              </el-popover>
+              <el-button v-if="scope.row.status == '0'" type="primary" size="small" icon="el-icon-caret-right" @click="addOrUpdate(scope.row)"/>
+              <el-button v-if="scope.row.status == '3'" type="primary" size="small" icon="el-icon-loading" />
+              <el-button slot="reference" :disabled="scope.row.status != '1'" type="primary" size="small" icon="el-icon-download" @click="visible=true"/>
             </template>
           </el-table-column>
         </el-table>
@@ -182,7 +158,7 @@
 </template>
 
 <script>
-import { getAdminList, getRoleList, saveAdmin, deleteAdmin, updateAdmin } from '../../api/userApi'
+import { getCrawlingList } from '../../api/userApi'
 export default {
   components: {
   },
@@ -215,21 +191,41 @@ export default {
     }
   },
   activated() {
-    this.getAdminList()
+    this.getCrawlingList()
   },
   created() {
-    this.getAdminList()
+    this.getCrawlingList()
   },
   methods: {
-    getAdminList() {
+    submitUpload() {
+      this.$refs.upload.submit()
+    },
+    onSuccess(response, file, fileList) {
+      this.$notify({
+        title: '上传成功',
+        type: 'success'
+      })
+      this.$refs.upload.clearFiles()
+    },
+    onError(response, file, fileList) {
+      this.$notify({
+        title: '上传失败，请稍后重试',
+        type: 'error'
+      })
+    },
+    toDownload() {
+      // window.location.href = 'http://baozhishun.com/上传模板.xls'
+      window.location.href = 'http://192.168.1.102:8082/crawling/carinfo/exportCrawlingDataList?seriesNo=20190624132513406182'
+    },
+    getCrawlingList() {
       this.dataListLoading = true
       const params = {
         page: this.pageIndex,
         size: this.pageSize
       }
-      getAdminList(params).then(res => {
+      getCrawlingList(params).then(res => {
         console.log(res)
-        if (res.code == 200) {
+        if (res.code === 200) {
           this.dataList = res.data.list
           this.totalPage = res.data.total
         } else {
@@ -239,117 +235,32 @@ export default {
         this.dataListLoading = false
       })
     },
-    dataFormSubmit() {
-      if (this.isAdd) {
-        const param = this.dataForm
-        saveAdmin(param).then(res => {
-          if (res.code === 200) {
-            this.$notify({
-              title: '操作成功',
-              type: 'success'
-            })
-          }
-          this.getAdminList()
-        })
-        this.dialog = false
-      } else {
-        const param = this.dataForm
-        updateAdmin(param).then(res => {
-          if (res.code === 200) {
-            this.$notify({
-              title: '操作成功',
-              type: 'success'
-            })
-          }
-          this.getAdminList()
-        })
-        this.dialog = false
-      }
+    handleRemove(file, fileList) {
+      console.log(file, fileList)
+    },
+    handlePreview(file) {
+      console.log(file)
+    },
+    handleExceed(files, fileList) {
+      this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)
+    },
+    beforeRemove(file, fileList) {
+      return this.$confirm(`确定移除 ${file.name}？`)
     },
     // 每页数
     sizeChangeHandle(val) {
       this.pageSize = val
       this.pageIndex = 1
-      this.getAdminList()
+      this.getCrawlingList()
     },
     // 当前页
     currentChangeHandle(val) {
       this.pageIndex = val
-      this.getAdminList()
+      this.getCrawlingList()
     },
     // 多选
     selectionChangeHandle(val) {
       this.dataListSelections = val
-    },
-    addOrUpdate(e) {
-      if (e.id) {
-        this.getRoleList()
-        this.dialog = true
-        this.isAdd = false
-        console.log(e)
-        this.dataForm = e
-        this.dataForm.status = Number(this.dataForm.status)
-        this.dataForm.loginPwd = ''
-      } else {
-        this.dataForm = {}
-        this.dialog = true
-        this.getRoleList()
-      }
-    },
-    getRoleList() {
-      const params = {
-
-      }
-      getRoleList(params).then(res => {
-        console.log(res)
-        if (res.code == 200) {
-          this.roleList = res.data.list
-          this.totalPage = res.data.total
-        } else {
-          this.dataList = []
-          this.totalPage = 0
-        }
-        this.dataListLoading = false
-      })
-    },
-    // 新增 / 修改
-    addOrUpdateHandle(e) {
-      this.addOrUpdateVisible = true
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(e)
-      })
-    },
-    deleteAdmin(e) {
-      const params = {
-        id: e
-      }
-      deleteAdmin(params).then(res => {
-        if (res.code === 200) {
-          this.$notify({
-            title: '操作成功',
-            type: 'success'
-          })
-          this.$refs[e].doClose()
-          this.getAdminList()
-        } else {
-          this.$message.error(res.data)
-        }
-      })
-    },
-    // 删除
-    deleteHandle(id) {
-      var userIds = id ? [id] : this.dataListSelections.map(item => {
-        return item.accountId
-      })
-      console.log(id)
-      console.log(userIds)
-      this.$confirm(`确认删除?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-
-      }).catch(() => {})
     }
   }
 }

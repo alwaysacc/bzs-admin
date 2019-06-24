@@ -87,3 +87,9 @@ export const getCarInfoQuote = (params) => {
 export const quoteDetails = (params) => {
   return http.fetchPost('/quoteinfo/quoteDetails', params)
 }
+
+// 爬虫
+export const getCrawlingList = (params) => {
+  return http.fetchPost('/crawling/excel/info/list', params)
+}
+

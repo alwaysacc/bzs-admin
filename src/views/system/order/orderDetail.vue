@@ -183,6 +183,7 @@ export default {
     .home{
         margin: 2em 1em 0 1em;
         font-size: 13px;
+        padding-bottom: 2em;
     }
     .line{
         height: 3em;

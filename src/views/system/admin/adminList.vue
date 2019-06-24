@@ -2,8 +2,8 @@
   <div class="app-container">
     <div class="head-container">
       <!-- 搜索 -->
-      <el-input v-model="query.value" clearable placeholder="输入名称搜索" style="width: 200px;" class="filter-item" @keyup.enter.native="toQuery"/>
-      <el-button class="filter-item" size="mini" type="success" icon="el-icon-search" @click="toQuery">搜索</el-button>
+      <!--      <el-input v-model="query.value" clearable placeholder="输入名称搜索" style="width: 200px;" class="filter-item" @keyup.enter.native="toQuery"/>-->
+      <!--      <el-button class="filter-item" size="mini" type="success" icon="el-icon-search" @click="toQuery">搜索</el-button>-->
       <!-- 新增 -->
       <div v-permission="['ADMIN','ROLES_ALL','ROLES_CREATE']" style="display: inline-block;margin: 0px 2px;">
         <el-button
@@ -25,9 +25,9 @@
             <el-input v-model="dataForm.name" placeholder="登录帐号" />
           </el-form-item>
           <el-form-item label="账号" prop="loginName">
-            <el-input v-model="dataForm.loginName" :disabled="!isAdd" autocomplete="off" placeholder="登录帐号" @blur="checkLoginName"/>
+            <el-input v-model="dataForm.loginName" :disabled="!isAdd" placeholder="登录帐号"/>
           </el-form-item>
-          <el-form-item label="密码" prop="loginPwd">
+          <el-form-item :prop="role" label="密码">
             <el-input v-model="dataForm.loginPwd" type="password" placeholder="密码" />
           </el-form-item>
           <!--      <el-form-item label="邮箱" prop="email">
@@ -36,7 +36,7 @@
           <el-form-item label="手机号" prop="mobile">
             <el-input v-model="dataForm.mobile" placeholder="手机号" />
           </el-form-item>
-          <el-form-item label="角色" size="mini" prop="roleIdList">
+          <el-form-item label="角色" size="mini" prop="roleId">
             <el-select v-model="dataForm.roleId" style="width:100%;" placeholder="请选择">
               <el-option
                 v-for="(item, index) in roleList"
@@ -96,6 +96,7 @@
             prop="loginName"
             header-align="center"
             align="center"
+            width="120"
             label="账号"
           />
           <el-table-column
@@ -183,16 +184,17 @@ export default {
   },
   data() {
     var checkLoginName = (rule, value, callback) => {
-      if (!value) {
-        callback(new Error('请输入账号'))
-      } else if (value.length < 6) {
-        callback(new Error('账号不得小于6位'))
-        console.log(this.errMsg)
-      } else if (this.errMsg) {
-        callback()
-      } else {
-        callback(new Error('账号已存在'))
+      const param = {
+        loginName: this.dataForm.loginName
       }
+      const c = callback
+      checkAdminLoginName(param).then(res => {
+        if (res) {
+          c(new Error('账号已存在'))
+        } else {
+          c()
+        }
+      })
     }
     return {
       dataForm: {
@@ -205,6 +207,8 @@ export default {
       form: { name: '', depts: [], remark: '', dataScope: '本级', level: 3 },
       rules: {
         loginName: [
+          { required: true, message: '请输入账号', trigger: 'blur' },
+          { min: 5, max: 16, message: '长度在 5 到 16 个字符' },
           { required: true, validator: checkLoginName, trigger: 'blur' }
         ],
         name:
@@ -221,14 +225,14 @@ export default {
           [{ required: true, message: '请输入手机号码', trigger: 'blur' },
             {
               validator: function(rule, value, callback) {
-                if (/^1[34578]\d{9}$/.test(value) == false) {
+                if (/^1[34578]\d{9}$/.test(value) === false) {
                   callback(new Error('请输入正确的手机号'))
                 } else {
                   callback()
                 }
               }, trigger: 'blur'
             }],
-        roleIdList:
+        roleId:
           [{ required: true, message: '必选', trigger: 'blur' }],
         status:
           [{ required: true, message: '必选', trigger: 'blur' }]
@@ -247,7 +251,8 @@ export default {
       roleList: {},
       isAdd: true,
       errMsg: true,
-      stat: 0
+      stat: 0,
+      role: ''
     }
   },
   activated() {
@@ -303,18 +308,8 @@ export default {
             })
             this.dialog = false
           }
-        }else {
+        } else {
           return false
-        }
-      })
-    },
-    checkLoginName() {
-      const param = {
-        loginName: this.dataForm.loginName
-      }
-      checkAdminLoginName(param).then(res => {
-        if (!res) {
-          this.errMsg = false
         }
       })
     },
@@ -334,21 +329,24 @@ export default {
       this.dataListSelections = val
     },
     addOrUpdate(e) {
-      if (this.stat == 0) {
+      if (this.stat === 0) {
         this.stat = this.stat + 1
       } else {
         this.$refs['dataForm'].clearValidate()
       }
       if (e.id) {
+        this.stat = this.stat + 1
+        this.role = ''
         this.getRoleList()
         this.dialog = true
         this.isAdd = false
-        console.log(e)
         this.dataForm = e
         this.dataForm.status = Number(this.dataForm.status)
         this.dataForm.loginPwd = ''
       } else {
         this.dataForm = {}
+        this.isAdd = true
+        this.role = 'loginPwd'
         this.dialog = true
         this.getRoleList()
       }
