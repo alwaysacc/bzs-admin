@@ -57,14 +57,15 @@ const user = {
 
     // 获取用户信息
     GetInfo({ commit }) {
-      return new Promise((resolve, reject) => {
+      setUserInfo(1, commit)
+     /* return new Promise((resolve, reject) => {
         getInfo().then(res => {
           setUserInfo(res, commit)
           resolve(res)
         }).catch(error => {
           reject(error)
         })
-      })
+      })*/
     },
 
     // 登出

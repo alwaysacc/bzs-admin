@@ -3,7 +3,7 @@
     <div class="head-container">
       <!-- 搜索 -->
       <!-- 新增 -->
-      <div v-permission="['ADMIN','ROLES_ALL','ROLES_CREATE']" style="display: inline-block;margin: 0px 2px;">
+      <div style="display: inline-block;margin: 0px 2px;">
         <el-button
           class="filter-item"
           type="primary"
@@ -18,37 +18,22 @@
         top="1vh"
         width="500px"
       >
-        <el-form ref="dataForm" :model="dataForm" :rules="dataRule" label-width="80px" @keyup.enter.native="dataFormSubmit()">
-
-          <el-form-item label="姓名" prop="userName">
-            <el-input v-model="dataForm.name" placeholder="登录帐号" />
+        <el-form ref="dataForm" :model="dataForm" :rules="rules" label-width="80px" @keyup.enter.native="dataFormSubmit()">
+          <el-form-item label="账号" prop="accountName">
+            <el-input v-model="dataForm.accountName" placeholder="登录帐号" />
           </el-form-item>
-          <el-form-item label="账号" prop="loginName">
-            <el-input v-model="dataForm.loginName" placeholder="登录帐号" />
+          <el-form-item label="密码" prop="accountPwd">
+            <el-input v-model="dataForm.accountPwd" placeholder="密码" />
           </el-form-item>
-          <el-form-item label="密码" prop="loginPwd">
-            <el-input v-model="dataForm.loginPwd" type="password" placeholder="密码" />
-          </el-form-item>
-          <!--      <el-form-item label="邮箱" prop="email">
-            <el-input v-model="dataForm.email" placeholder="邮箱"></el-input>
-          </el-form-item>-->
-          <el-form-item label="手机号" prop="mobile">
-            <el-input v-model="dataForm.mobile" placeholder="手机号" />
-          </el-form-item>
-          <el-form-item label="角色" size="mini" prop="roleIdList">
-            <el-select v-model="dataForm.roleId" style="width:100%;" placeholder="请选择">
+          <el-form-item :prop="roleAccountId" label="账号所属" size="mini">
+            <el-select v-if="isAdd" v-model="dataForm.accountId" style="width:100%;" placeholder="请选择">
               <el-option
-                v-for="(item, index) in roleList"
-                :key="item.name + index"
-                :label="item.name"
-                :value="item.id"/>
+                v-for="(item, index) in userList"
+                :key="item.userName + index"
+                :label="item.userName"
+                :value="item.accountId"/>
             </el-select>
-          </el-form-item>
-          <el-form-item label="状态" size="mini" prop="status">
-            <el-radio-group v-model="dataForm.status">
-              <el-radio :label="0">正常</el-radio>
-              <el-radio :label="1">禁用</el-radio>
-            </el-radio-group>
+            <el-input v-else v-model="dataForm.userName" disabled/>
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -79,19 +64,19 @@
             label="ID"
           />
           <el-table-column
-            prop="name"
+            prop="accountName"
             header-align="center"
             align="center"
             label="账号"
           />
           <el-table-column
-            prop="mobile"
+            prop="accountPwd"
             header-align="center"
             align="center"
             width="100"
             label="密码"
           />
-          <el-table-column
+          <!-- <el-table-column
             prop="loginName"
             header-align="center"
             align="center"
@@ -113,29 +98,13 @@
             <template slot-scope="scope">
               {{ util.formatTime(scope.row.create_time) }}
             </template>
-          </el-table-column>
+          </el-table-column>-->
           <el-table-column
-            prop="status"
+            prop="userName"
             header-align="center"
             align="center"
             label="账号所属"
-          >
-            <template slot-scope="scope">
-              <el-tag v-if="scope.row.status != '0'" size="small" type="danger">禁用</el-tag>
-              <el-tag v-else size="small">正常</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="createdTime"
-            header-align="center"
-            align="center"
-            width="180"
-            label="最后登录时间"
-          >
-            <template slot-scope="scope">
-              {{ util.formatTime(scope.row.last_login_time) }}
-            </template>
-          </el-table-column>
+          />
           <el-table-column
             fixed="right"
             header-align="center"
@@ -144,17 +113,17 @@
             label="操作"
           >
             <template slot-scope="scope">
-              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdate(scope.row)"></el-button>
+              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdate(scope.row)"/>
               <el-popover
-                :ref="scope.row.id"
+                :ref="scope.row.thirdInsuranceId"
                 placement="top"
                 width="160">
                 <p>确定删除吗？</p>
                 <div style="text-align: right; margin: 0">
-                  <el-button size="mini" type="text" @click="$refs[scope.row.id].doClose()">取消</el-button>
-                  <el-button type="primary" size="mini" @click="deleteAdmin(scope.row.id)">确定</el-button>
+                  <el-button size="mini" type="text" @click="$refs[scope.row.thirdInsuranceId].doClose()">取消</el-button>
+                  <el-button type="primary" size="mini" @click="deleteAccount(scope.row.thirdInsuranceId)">确定</el-button>
                 </div>
-                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"></el-button>
+                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
               </el-popover>
             </template>
           </el-table-column>
@@ -174,19 +143,27 @@
 </template>
 
 <script>
-import { getAdminList, getRoleList, saveAdmin, deleteAdmin, updateAdmin } from '../../api/userApi'
+import { getCrawlingAdminList, getUserNameAndId, addThirdAccount, updateThirdAccount ,deleteThirdAccount} from '../../api/userApi'
 export default {
   components: {
   },
   data() {
     return {
-      dateScopes: ['全部', '本级', '自定义'],
       loading: false, dialog: false, depts: [], deptIds: [],
       form: { name: '', depts: [], remark: '', dataScope: '本级', level: 3 },
       rules: {
-        name: [
-          { required: true, message: '请输入名称', trigger: 'blur' }
-        ]
+        accountName: [
+          { required: true, message: '请输入账号', trigger: 'blur' },
+          { min: 5, max: 16, message: '长度在 5 到 16 个字符' }
+        ],
+        accountPwd:
+          [{ required: true, message: '请输入密码', trigger: 'blur' },
+            { min: 5, max: 25, message: '长度在 5 到 25个字符' },
+            { pattern: /^(\w){5,25}$/, message: '只能输入5-25个字母、数字、下划线' }
+          ],
+        accountId:
+          [{ required: true, message: '请选择所属', trigger: 'blur' }
+          ]
       },
       visible: false,
       query: {
@@ -203,25 +180,27 @@ export default {
       dataListSelections: [],
       addOrUpdateVisible: false,
       roleList: {},
-      isAdd: true
+      isAdd: true,
+      roleAccountId: '',
+      userList: []
     }
   },
-  activated() {
-    this.getAdminList()
-  },
   created() {
-    this.getAdminList()
+    this.getCrawlingAdminList()
   },
   methods: {
-    getAdminList() {
+    getCrawlingAdminList() {
+      const user = JSON.parse(this.$store.getters.user)
+      console.log(user)
       this.dataListLoading = true
       const params = {
         page: this.pageIndex,
-        size: this.pageSize
+        size: this.pageSize,
+        createBy: user.id
       }
-      getAdminList(params).then(res => {
+      getCrawlingAdminList(params).then(res => {
         console.log(res)
-        if (res.code == 200) {
+        if (res.code === 200) {
           this.dataList = res.data.list
           this.totalPage = res.data.total
         } else {
@@ -232,50 +211,57 @@ export default {
       })
     },
     dataFormSubmit() {
-      if (this.isAdd) {
-        const param = this.dataForm
-        saveAdmin(param).then(res => {
-          if (res.code === 200) {
-            this.$notify({
-              title: '操作成功',
-              type: 'success'
+      console.log(this.dataForm)
+      const user = JSON.parse(this.$store.getters.user)
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          if (this.isAdd) {
+            const param = this.dataForm
+            param.createId = user.id
+            addThirdAccount(param).then(res => {
+              if (res.code === 200) {
+                this.$notify({
+                  title: '操作成功',
+                  type: 'success'
+                })
+              }
+              this.getCrawlingAdminList()
             })
-          }
-          this.getAdminList()
-        })
-        this.dialog = false
-      } else {
-        const param = this.dataForm
-        updateAdmin(param).then(res => {
-          if (res.code === 200) {
-            this.$notify({
-              title: '操作成功',
-              type: 'success'
+            this.dialog = false
+          } else {
+            const param = this.dataForm
+            updateThirdAccount(param).then(res => {
+              if (res.code === 200) {
+                this.$notify({
+                  title: '操作成功',
+                  type: 'success'
+                })
+              }
+              this.getCrawlingAdminList()
             })
+            this.dialog = false
           }
-          this.getAdminList()
-        })
-        this.dialog = false
-      }
+        }
+      })
     },
     // 每页数
     sizeChangeHandle(val) {
       this.pageSize = val
       this.pageIndex = 1
-      this.getAdminList()
+      this.getCrawlingAdminList()
     },
     // 当前页
     currentChangeHandle(val) {
       this.pageIndex = val
-      this.getAdminList()
+      this.getCrawlingAdminList()
     },
     // 多选
     selectionChangeHandle(val) {
       this.dataListSelections = val
     },
     addOrUpdate(e) {
-      if (e.id) {
-        this.getRoleList()
+      if (e.thirdInsuranceId) {
+        this.roleAccountId = ''
         this.dialog = true
         this.isAdd = false
         console.log(e)
@@ -283,66 +269,40 @@ export default {
         this.dataForm.status = Number(this.dataForm.status)
         this.dataForm.loginPwd = ''
       } else {
+        this.roleAccountId = 'accountId'
         this.dataForm = {}
         this.dialog = true
-        this.getRoleList()
+        this.isAdd = true
+        this.getUserNameList()
       }
     },
-    getRoleList() {
+    getUserNameList() {
       const params = {
-
       }
-      getRoleList(params).then(res => {
+      getUserNameAndId(params).then(res => {
         console.log(res)
-        if (res.code == 200) {
-          this.roleList = res.data.list
-          this.totalPage = res.data.total
-        } else {
-          this.dataList = []
-          this.totalPage = 0
+        if (res.code === 200) {
+          this.userList = res.data
         }
-        this.dataListLoading = false
       })
     },
-    // 新增 / 修改
-    addOrUpdateHandle(e) {
-      this.addOrUpdateVisible = true
-      this.$nextTick(() => {
-        this.$refs.addOrUpdate.init(e)
-      })
-    },
-    deleteAdmin(e) {
+    deleteAccount(e) {
       const params = {
-        id: e
+        accountId: e
       }
-      deleteAdmin(params).then(res => {
+      deleteThirdAccount(params).then(res => {
         if (res.code === 200) {
           this.$notify({
             title: '操作成功',
             type: 'success'
           })
           this.$refs[e].doClose()
-          this.getAdminList()
+          this.getCrawlingAdminList()
         } else {
           this.$message.error(res.data)
         }
       })
     },
-    // 删除
-    deleteHandle(id) {
-      var userIds = id ? [id] : this.dataListSelections.map(item => {
-        return item.accountId
-      })
-      console.log(id)
-      console.log(userIds)
-      this.$confirm(`确认删除?`, '提示', {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'warning'
-      }).then(() => {
-
-      }).catch(() => {})
-    }
   }
 }
 </script>

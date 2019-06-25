@@ -1,6 +1,9 @@
 import http from '../utils/axios'
 
 // 用户
+export const getHomeInfo = (params) => {
+  return http.fetchPost('/account/info/getHomeInfo', params)
+}
 export const getUserList = (params) => {
   return http.fetchPost('/account/info/list', params)
 }
@@ -90,6 +93,26 @@ export const quoteDetails = (params) => {
 
 // 爬虫
 export const getCrawlingList = (params) => {
-  return http.fetchPost('/crawling/excel/info/list', params)
+  return http.fetchPost('/crawling/excelinfo/list', params)
 }
-
+export const startCrawling = (params) => {
+  return http.fetchPost('/crawling/carinfo/startCrawling', params)
+}
+export const exportCrawlingDataList = (params) => {
+  return http.fetchGet('/crawling/carinfo/exportCrawlingDataList?seriesNo=' + params, '')
+}
+export const getCrawlingAdminList = (params) => {
+  return http.fetchPost('/thirdAccount/getCrawlingAdminList', params)
+}
+export const getUserNameAndId = (params) => {
+  return http.fetchPost('/account/info/getUserNameAndId', params)
+}
+export const addThirdAccount = (params) => {
+  return http.fetchPost('/thirdAccount/add', params)
+}
+export const updateThirdAccount = (params) => {
+  return http.fetchPost('/thirdAccount/update', params)
+}
+export const deleteThirdAccount = (params) => {
+  return http.fetchPost('/thirdAccount/delete', params)
+}

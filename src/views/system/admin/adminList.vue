@@ -24,7 +24,7 @@
           <el-form-item label="姓名" prop="name">
             <el-input v-model="dataForm.name" placeholder="登录帐号" />
           </el-form-item>
-          <el-form-item label="账号" prop="loginName">
+          <el-form-item :prop="roleLoginName" label="账号">
             <el-input v-model="dataForm.loginName" :disabled="!isAdd" placeholder="登录帐号"/>
           </el-form-item>
           <el-form-item :prop="role" label="密码">
@@ -221,6 +221,11 @@ export default {
             { min: 5, max: 25, message: '长度在 5 到 25个字符' },
             { pattern: /^(\w){5,25}$/, message: '只能输入5-25个字母、数字、下划线' }
           ],
+        loginPwd2:
+          [{ required: false, message: '请输入密码', trigger: 'blur' },
+            { min: 5, max: 25, message: '长度在 5 到 25个字符' },
+            { pattern: /^(\w){5,25}$/, message: '只能输入5-25个字母、数字、下划线' }
+          ],
         mobile:
           [{ required: true, message: '请输入手机号码', trigger: 'blur' },
             {
@@ -252,7 +257,8 @@ export default {
       isAdd: true,
       errMsg: true,
       stat: 0,
-      role: ''
+      role: '',
+      roleLoginName: ''
     }
   },
   activated() {
@@ -342,11 +348,13 @@ export default {
         this.isAdd = false
         this.dataForm = e
         this.dataForm.status = Number(this.dataForm.status)
-        this.dataForm.loginPwd = ''
+        this.dataForm.loginPwd = 'loginPwd2'
+        this.roleLoginName = ''
       } else {
         this.dataForm = {}
         this.isAdd = true
         this.role = 'loginPwd'
+        this.roleLoginName = 'loginName'
         this.dialog = true
         this.getRoleList()
       }

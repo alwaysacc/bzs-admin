@@ -24,10 +24,10 @@
             <el-form-item label="姓名" prop="userName">
               <el-input v-model="dataForm.userName" placeholder="登录帐号" />
             </el-form-item>
-            <el-form-item label="账号" prop="loginName">
+            <el-form-item label="账号" :prop="roleLoginName">
               <el-input v-model="dataForm.loginName" :disabled="!isAdd" placeholder="登录帐号" @blur="checkLoginName"/>
             </el-form-item>
-            <el-form-item :class="{ 'is-required': !dataForm.id }" label="密码" prop="loginPwd">
+            <el-form-item :class="{ 'is-required': !dataForm.id }" label="密码" :prop="roleLoginPwd">
               <el-input v-model="dataForm.loginPwd" type="password" placeholder="密码" />
             </el-form-item>
             <!--      <el-form-item label="邮箱" prop="email">
@@ -41,10 +41,11 @@
                 <el-checkbox v-for="role in roleList" :key="role.roleId" :label="role.roleId">{{ role.roleName }}</el-checkbox>
               </el-checkbox-group>
             </el-form-item>-->
-            <el-form-item label="状态" size="mini" prop="status">
+            <el-form-item label="状态" size="mini" prop="accountState">
               <el-radio-group v-model="dataForm.accountState">
                 <el-radio :label="1">禁用</el-radio>
                 <el-radio :label="0">正常</el-radio>
+                <el-radio :label="2">待审核</el-radio>
               </el-radio-group>
             </el-form-item>
           </el-form>
@@ -170,7 +171,7 @@
             <template slot-scope="scope">
               <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdate(scope.row)"/>
               <el-popover
-                :ref="scope.row.id"
+                :ref="scope.row.account_id"
                 placement="top"
                 width="160">
                 <p>确定删除吗？</p>
@@ -236,6 +237,11 @@ export default {
             { min: 5, max: 25, message: '长度在 5 到 25个字符' },
             { pattern: /^(\w){5,25}$/, message: '只能输入5-25个字母、数字、下划线' }
           ],
+        loginPwd2:
+          [{ required: false, message: '请输入密码', trigger: 'blur' },
+            { min: 5, max: 25, message: '长度在 5 到 25个字符' },
+            { pattern: /^(\w){5,25}$/, message: '只能输入5-25个字母、数字、下划线' }
+          ],
         mobile:
           [{ required: true, message: '请输入手机号码', trigger: 'blur' },
             {
@@ -249,7 +255,7 @@ export default {
             }],
         roleIdList:
           [{ required: true, message: '必选', trigger: 'blur' }],
-        status:
+        accountState:
           [{ required: true, message: '必选', trigger: 'blur' }]
       },
       dataList: [],
@@ -263,7 +269,9 @@ export default {
       dialog: false,
       userName: '',
       errMsg: true,
-      stat: 0
+      stat: 0,
+      roleLoginName:'',
+      roleLoginPwd:'',
     }
   },
   activated() {
@@ -314,8 +322,12 @@ export default {
         this.dataForm = e
         this.dataForm.accountState = Number(this.dataForm.accountState)
         this.dataForm.loginPwd = ''
+        this.roleLoginName=''
+        this.roleLoginPwd='loginPwd2'
       } else {
         this.dataForm = {}
+        this.roleLoginName='loginName'
+        this.roleLoginPwd='loginPwd'
         this.dialog = true
       }
     },

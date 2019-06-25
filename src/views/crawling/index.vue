@@ -22,15 +22,16 @@
       <el-dialog
         :visible.sync="dialog"
         :modal-append-to-body="false"
+        :append-to-body="true"
         title="选择文件"
         top="1vh"
         width="500px"
       >
-        <el-form ref="dataForm" :model="dataForm" :rules="dataRule" label-width="80px" @keyup.enter.native="dataFormSubmit()">
-          <el-form-item label="爬取方式">
-            <el-radio-group v-model="dataForm.resource">
-              <el-radio label="车牌号"/>
-              <el-radio label="车架号"/>
+        <el-form ref="dataForm" :model="dataForm" :rules="rules" label-width="80px" @keyup.enter.native="dataFormSubmit()">
+          <el-form-item label="爬取方式" prop="type">
+            <el-radio-group v-model="dataForm.type">
+              <el-radio :label="1">车牌号</el-radio>
+              <el-radio :label="2">车架号</el-radio>
             </el-radio-group>
           </el-form-item>
           <el-form-item label="选择文件">
@@ -41,13 +42,16 @@
               :on-success="onSuccess"
               :on-error="onError"
               :before-remove="beforeRemove"
-              :limit="3"
+              :limit="1"
               :on-exceed="handleExceed"
               :file-list="fileList"
               :auto-upload="false"
+              :on-change="beforeAvatarUpload"
+              :data="dataForm"
+              :action="url"
+              accept=".xls,.xlsx"
               show-file-list="false"
               class="upload-demo"
-              action="https://jsonplaceholder.typicode.com/posts/"
               multiple>
               <el-button class="filter-item" size="mini" type="primary">点击上传</el-button>
             </el-upload>
@@ -137,9 +141,9 @@
             label="操作"
           >
             <template slot-scope="scope">
-              <el-button v-if="scope.row.status == '0'" type="primary" size="small" icon="el-icon-caret-right" @click="addOrUpdate(scope.row)"/>
+              <el-button v-if="scope.row.status == '0'" type="primary" size="small" icon="el-icon-caret-right" @click="start(scope.row.seriesNo)"/>
               <el-button v-if="scope.row.status == '3'" type="primary" size="small" icon="el-icon-loading" />
-              <el-button slot="reference" :disabled="scope.row.status != '1'" type="primary" size="small" icon="el-icon-download" @click="visible=true"/>
+              <el-button slot="reference" :disabled="scope.row.status != '1'" type="primary" size="small" icon="el-icon-download" @click="downLoad(scope.row.seriesNo)"/>
             </template>
           </el-table-column>
         </el-table>
@@ -158,7 +162,7 @@
 </template>
 
 <script>
-import { getCrawlingList } from '../../api/userApi'
+import { getCrawlingList, startCrawling } from '../../api/userApi'
 export default {
   components: {
   },
@@ -168,16 +172,12 @@ export default {
       loading: false, dialog: false, depts: [], deptIds: [],
       form: { name: '', depts: [], remark: '', dataScope: '本级', level: 3 },
       rules: {
-        name: [
-          { required: true, message: '请输入名称', trigger: 'blur' }
-        ]
+        type:
+          [{ required: true, message: '必选', trigger: 'blur' }]
       },
       visible: false,
       query: {
         value: ''
-      },
-      dataForm: {
-        userName: ''
       },
       dataList: [],
       pageIndex: 1,
@@ -187,7 +187,14 @@ export default {
       dataListSelections: [],
       addOrUpdateVisible: false,
       roleList: {},
-      isAdd: true
+      isAdd: true,
+      dataForm: {
+        createBy: 1,
+        type: ''
+      },
+      url: '',
+      fileList: [],
+      uploadStat: false
     }
   },
   activated() {
@@ -198,13 +205,37 @@ export default {
   },
   methods: {
     submitUpload() {
-      this.$refs.upload.submit()
+      this.$refs['dataForm'].validate((valid) => {
+        if (valid) {
+          if (!this.uploadStat) {
+            this.$notify({
+              title: '请选择文件',
+              type: 'warning'
+            })
+          } else {
+            console.log(this.url)
+            const user = JSON.parse(this.$store.getters.user)
+            this.dataForm.createBy = user.id
+            console.log(this.dataForm)
+            this.$refs.upload.submit()
+            this.dialog = false
+          }
+        }
+      })
     },
     onSuccess(response, file, fileList) {
-      this.$notify({
-        title: '上传成功',
-        type: 'success'
-      })
+      if (response.code === 200) {
+        this.$notify({
+          title: '上传成功',
+          type: 'success'
+        })
+        this.getCrawlingList()
+      } else {
+        this.$notify({
+          title: '上传失败，请稍后重试',
+          type: 'error'
+        })
+      }
       this.$refs.upload.clearFiles()
     },
     onError(response, file, fileList) {
@@ -214,8 +245,7 @@ export default {
       })
     },
     toDownload() {
-      // window.location.href = 'http://baozhishun.com/上传模板.xls'
-      window.location.href = 'http://192.168.1.102:8082/crawling/carinfo/exportCrawlingDataList?seriesNo=20190624132513406182'
+      window.location.href = 'http://baozhishun.com/上传模板.xls'
     },
     getCrawlingList() {
       this.dataListLoading = true
@@ -235,11 +265,63 @@ export default {
         this.dataListLoading = false
       })
     },
+    downLoad(e) {
+      window.location.href = process.env.BASE_API + 'crawling/carinfo/exportCrawlingDataList?seriesNo=' + e
+      console.log(process.env.BASE_API)
+      /* const param = {
+        seriesNo: e
+      }
+      exportCrawlingDataList(e).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          this.$notify({
+            title: '操作成功',
+            type: 'success'
+          })
+          this.getCrawlingList()
+        } else {
+          this.$notify({
+            title: '操作失败',
+            type: 'error'
+          })
+        }
+      })*/
+    },
+    start(e) {
+      const param = {
+        seriesNo: e
+      }
+      startCrawling(param).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          this.$notify({
+            title: '操作成功',
+            type: 'success'
+          })
+          this.getCrawlingList()
+        } else {
+          this.$notify({
+            title: '操作失败',
+            type: 'error'
+          })
+        }
+      })
+    },
+    beforeAvatarUpload(file, fileList) {
+      console.log(111111111111)
+      this.url = process.env.BASE_API + 'crawling/carinfo/import'
+      if (fileList.length != 0) {
+        this.uploadStat = true
+      }
+    },
     handleRemove(file, fileList) {
       console.log(file, fileList)
+      console.log(2)
+      this.uploadStat = false
     },
     handlePreview(file) {
       console.log(file)
+      console.log(1)
     },
     handleExceed(files, fileList) {
       this.$message.warning(`当前限制选择 3 个文件，本次选择了 ${files.length} 个文件，共选择了 ${files.length + fileList.length} 个文件`)

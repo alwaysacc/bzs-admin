@@ -50,6 +50,19 @@ export const constantRouterMap = [
   {
     path: '/',
     component: Layout,
+    redirect: 'dashboard',
+    children: [
+      {
+        path: 'dashboard',
+        component: () => import('@/views/dashboard/index'),
+        name: '首页',
+        meta: { title: '首页', icon: 'index', noCache: true, affix: true }
+      }
+    ]
+  },
+  {
+    path: '/',
+    component: Layout,
     hidden: true,
     redirect: 'quoteDetail',
     children: [
@@ -75,19 +88,7 @@ export const constantRouterMap = [
       }
     ]
   },
-  {
-    path: '/',
-    component: Layout,
-    redirect: 'dashboard',
-    children: [
-      {
-        path: 'dashboard',
-        component: () => import('@/views/dashboard/index'),
-        name: '首页',
-        meta: { title: '首页', icon: 'index', noCache: true, affix: true }
-      }
-    ]
-  },
+
   {
     path: '/user',
     component: Layout,
@@ -106,7 +107,7 @@ export const constantRouterMap = [
 ]
 
 export default new Router({
-  mode: 'history',
+  // mode: 'history',
   scrollBehavior: () => ({ y: 0 }),
   routes: constantRouterMap
 })

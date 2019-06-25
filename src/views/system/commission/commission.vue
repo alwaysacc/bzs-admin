@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-row :gutter="20">
-      <el-col :xs="17" :sm="18" :md="24" :lg="24" :xl="24">
+      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
         <!--<el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
       <el-form-item>
         <el-input v-model="dataForm.userName" placeholder="用户名" clearable />
@@ -31,9 +31,7 @@
             label="保险公司"
           >
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.source === '1'" size="small">太平洋保险</el-tag>
-              <el-tag v-else-if="scope.row.source === '2'" size="small">平安保险</el-tag>
-              <el-tag v-else size="small">人民保险</el-tag>
+              <el-tag size="small">{{ scope.row.source }}</el-tag>
             </template>
           </el-table-column>
           <el-table-column
@@ -86,7 +84,7 @@
             label="操作"
           >
             <template slot-scope="scope">
-              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdateHandle(scope.row)"></el-button>
+              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdateHandle(scope.row)"/>
             </template>
           </el-table-column>
         </el-table>
