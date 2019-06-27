@@ -268,13 +268,10 @@
               </el-col>
             </el-row>-->
           </div>
-          <el-row class="line">
-            <el-col span="3">
-              <a style="font-weight: bold">被保险人信息</a>
-            </el-col>
-            <el-col v-if="!value2" span="21">
-              <a style="color: red">被保险人与车主一致</a>
-            </el-col>
+          <el-row/>
+          <el-row class="line" type="flex">
+            <a style="font-weight: bold">被保险人信息</a>
+            <a style="color: red; margin-left: 20px">被保险人与车主一致</a>
           </el-row>
           <div class="text-right">
             <el-row v-if="!owner" class="row">
@@ -304,14 +301,9 @@
               </el-col>
             </el-row>
           </div>
-          <el-row class="line">
-            <el-col span="3">
-              <a style="font-weight: bold">投保人信息</a>
-
-            </el-col>
-            <el-col span="21">
-              <a style="color: red">投保人与车主一致</a>
-            </el-col>
+          <el-row class="line" type="flex">
+            <a style="font-weight: bold">投保人信息</a>
+            <a style="color: red;margin-left: 20px">投保人与车主一致</a>
           </el-row>
           <div v-if="!toubaoren" class="text-right">
             <el-row class="row">
@@ -413,323 +405,350 @@
                 </el-row>
               </li>
             </ul>-->
-            <el-tabs v-model="activeNum" tab-position="left" @tab-click="handleClick">
-              <el-tab-pane label="人保" name="1">
-                <div v-if="activeNum==1" class="baojia">
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      车牌号：
-                    </el-col>
-                    <el-col span="20">
-                      {{ map.carInfo.carNumber }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      报价状态：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Rquote.quoteStatus==1?'报价成功':'报价失败' }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      报价内容：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Rquote.quoteResult }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      核保状态：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Rquote.submitStatus==1?'核保成功':'核保失败' }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      核保内容：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Rquote.submitresult }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="5">无赔款优惠系数:</el-col>
-                    <el-col span="3">{{ Rquote.noReparationSaleRate==null?0:Rquote.noReparationSaleRate }}<i
-                      class="el-icon-question"
-                      @click="youhui = true"
-                    /></el-col>
-                    <el-dialog
-                      :visible.sync="youhui"
-                      :before-close="handleClose"
-                      title="无赔款系数"
-                      width="30%"
-                      top="1vh"
-                      style="text-align: center"
-                    >
+            <el-row>
+              <el-col lg="24" sm="24">
+                <el-tabs v-model="activeNum" tab-position="left" @tab-click="handleClick">
+                  <el-tab-pane label="人保" name="1">
+                    <div v-if="activeNum==1" class="baojia">
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          车牌号：
+                        </el-col>
+                        <el-col span="20">
+                          {{ map.carInfo.carNumber }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          报价状态：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Rquote.quoteStatus==1?'报价成功':'报价失败' }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          报价内容：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Rquote.quoteResult }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          核保状态：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Rquote.submitStatus==1?'核保成功':'核保失败' }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          核保内容：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Rquote.submitresult }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="5">无赔款优惠系数:</el-col>
+                        <el-col span="3">{{ Rquote.noReparationSaleRate==null?0:Rquote.noReparationSaleRate }}<i
+                          class="el-icon-question"
+                          @click="youhui = true"
+                        /></el-col>
+                        <el-dialog
+                          :visible.sync="youhui"
+                          :before-close="handleClose"
+                          title="无赔款系数"
+                          width="30%"
+                          top="1vh"
+                          style="text-align: center"
+                        >
 
-                      <img src="http://bao.91bihu.com/resources/images/quote/rb.png" style="width: 66%">
-                    </el-dialog>
-                    <el-col span="4">自主渠道系数:</el-col>
-                    <el-col span="4">{{ Rquote.independentChannelDate==null?0:Rquote.independentChannelDate }}</el-col>
-                    <el-col span="4">自主核保系数:</el-col>
-                    <el-col span="4">{{ Rquote.independentSubmitRate==null?0:Rquote.independentSubmitRate }}</el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="5">交通违法浮动系数:</el-col>
-                    <el-col span="3">{{ Rquote.trafficIllegalRate==null?0:Rquote.trafficIllegalRate }}</el-col>
-                    <el-col span="4">折扣系数:</el-col>
-                    <el-col span="4">{{ Rquote.discountRate==null?0:Rquote.discountRate }}</el-col>
-                    <el-col span="8" />
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="3">
-                      报价渠道：
-                    </el-col>
-                    <el-col span="21">
-                      保之顺
-                    </el-col>
-                  </el-row>
-                  <el-table
-                    :data="RquoteList"
-                    :span-method="arraySpanMethod"
-                    border
-                    size="mini"
-                    style="width: 100%"
-                  >
-                    <el-table-column
-                      prop="insurance_name"
-                      label="承保险种"
-                      width="180"
-                    />
-                    <el-table-column
-                      prop="insurance_amount"
-                      label="保险金额/责任限额"
-                    />
-                    <el-table-column
-                      prop="insurance_premium"
-                      label="保险费(元)"
-                    />
-                  </el-table>
-                </div>
+                          <img src="http://bao.91bihu.com/resources/images/quote/rb.png" style="width: 66%">
+                        </el-dialog>
+                        <el-col span="4">自主渠道系数:</el-col>
+                        <el-col span="4">{{ Rquote.independentChannelDate==null?0:Rquote.independentChannelDate }}</el-col>
+                        <el-col span="4">自主核保系数:</el-col>
+                        <el-col span="4">{{ Rquote.independentSubmitRate==null?0:Rquote.independentSubmitRate }}</el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="5">交通违法浮动系数:</el-col>
+                        <el-col span="3">{{ Rquote.trafficIllegalRate==null?0:Rquote.trafficIllegalRate }}</el-col>
+                        <el-col span="4">折扣系数:</el-col>
+                        <el-col span="4">{{ Rquote.discountRate==null?0:Rquote.discountRate }}</el-col>
+                        <el-col span="8" />
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="3">
+                          报价渠道：
+                        </el-col>
+                        <el-col span="21">
+                          保之顺
+                        </el-col>
+                      </el-row>
+                      <el-table
+                        :data="RquoteList"
+                        :span-method="arraySpanMethod"
+                        border
+                        size="mini"
+                        style="width: 100%"
+                      >
+                        <el-table-column
+                          prop="insurance_name"
+                          label="承保险种"
+                          width="180"
+                        />
+                        <el-table-column
+                          prop="insurance_amount"
+                          label="保险金额/责任限额"
+                        >
+                          <template slot-scope="scope">
+                            {{ scope.row.insurance_amount=='1'?'投保':scope.row.insurance_amount }}
+                          </template>
+                        </el-table-column>
+                        <el-table-column
+                          prop="insurance_premium"
+                          label="保险费(元)"
+                        >
+                          <template slot-scope="scope">
+                            {{ scope.row.insurance_name=='交强险'?Rquote.forceTotal:scope.row.insurance_premium }}
+                          </template>
+                        </el-table-column>
+                      </el-table>
+                    </div>
 
-              </el-tab-pane>
-              <el-tab-pane label="太平洋" name="2">
-                <div v-if="activeNum==2" class="baojia">
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      车牌号：
-                    </el-col>
-                    <el-col span="20">
-                      {{ map.carInfo.carNumber }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      报价状态：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Tquote.quoteStatus==1?'报价成功':'报价失败' }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      报价内容：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Tquote.quoteResult }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      核保状态：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Tquote.submitStatus==1?'核保成功':'核保失败' }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      核保内容：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Tquote.submitresult }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="5">无赔款优惠系数:</el-col>
-                    <el-col span="3">{{ Tquote.noReparationSaleRate==null?0:Tquote.noReparationSaleRate }}<i
-                      class="el-icon-question"
-                      @click="youhui = true"
-                    /></el-col>
-                    <el-dialog
-                      :visible.sync="youhui"
-                      :before-close="handleClose"
-                      title="无赔款系数"
-                      width="30%"
-                      top="1vh"
-                      style="text-align: center"
-                    >
+                  </el-tab-pane>
+                  <el-tab-pane label="太平洋" name="2">
+                    <div v-if="activeNum==2" class="baojia">
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          车牌号：
+                        </el-col>
+                        <el-col span="20">
+                          {{ map.carInfo.carNumber }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          报价状态：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Tquote.quoteStatus==1?'报价成功':'报价失败' }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          报价内容：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Tquote.quoteResult }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          核保状态：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Tquote.submitStatus==1?'核保成功':'核保失败' }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          核保内容：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Tquote.submitresult }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="5">无赔款优惠系数:</el-col>
+                        <el-col span="3">{{ Tquote.noReparationSaleRate==null?0:Tquote.noReparationSaleRate }}<i
+                          class="el-icon-question"
+                          @click="youhui = true"
+                        /></el-col>
+                        <el-dialog
+                          :visible.sync="youhui"
+                          :before-close="handleClose"
+                          title="无赔款系数"
+                          width="30%"
+                          top="1vh"
+                          style="text-align: center"
+                        >
 
-                      <img src="http://bao.91bihu.com/resources/images/quote/rb.png" style="width: 66%">
-                    </el-dialog>
-                    <el-col span="4">自主渠道系数:</el-col>
-                    <el-col span="4">{{ Tquote.independentChannelDate==null?0:Tquote.independentChannelDate }}</el-col>
-                    <el-col span="4">自主核保系数:</el-col>
-                    <el-col span="4">{{ Tquote.independentSubmitRate==null?0:Tquote.independentSubmitRate }}</el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="5">交通违法浮动系数:</el-col>
-                    <el-col span="3">{{ Tquote.trafficIllegalRate==null?0:Tquote.trafficIllegalRate }}</el-col>
-                    <el-col span="4">折扣系数:</el-col>
-                    <el-col span="4">{{ Tquote.discountRate==null?0:Tquote.discountRate }}</el-col>
-                    <el-col span="8" />
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="3">
-                      报价渠道：
-                    </el-col>
-                    <el-col span="21">
-                      保之顺
-                    </el-col>
-                  </el-row>
-                  <el-table
-                    :data="TquoteList"
-                    :span-method="arraySpanMethod"
-                    border
-                    size="mini"
-                    style="width: 100%"
-                  >
-                    <el-table-column
-                      prop="insurance_name"
-                      label="承保险种"
-                      width="180"
-                    />
-                    <el-table-column
-                      prop="insurance_amount"
-                      label="保险金额/责任限额"
-                    />
-                    <el-table-column
-                      prop="insurance_premium"
-                      label="保险费(元)"
-                    />
-                  </el-table>
-                </div>
+                          <img src="http://bao.91bihu.com/resources/images/quote/rb.png" style="width: 66%">
+                        </el-dialog>
+                        <el-col span="4">自主渠道系数:</el-col>
+                        <el-col span="4">{{ Tquote.independentChannelDate==null?0:Tquote.independentChannelDate }}</el-col>
+                        <el-col span="4">自主核保系数:</el-col>
+                        <el-col span="4">{{ Tquote.independentSubmitRate==null?0:Tquote.independentSubmitRate }}</el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="5">交通违法浮动系数:</el-col>
+                        <el-col span="3">{{ Tquote.trafficIllegalRate==null?0:Tquote.trafficIllegalRate }}</el-col>
+                        <el-col span="4">折扣系数:</el-col>
+                        <el-col span="4">{{ Tquote.discountRate==null?0:Tquote.discountRate }}</el-col>
+                        <el-col span="8" />
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="3">
+                          报价渠道：
+                        </el-col>
+                        <el-col span="21">
+                          保之顺
+                        </el-col>
+                      </el-row>
+                      <el-table
+                        :data="TquoteList"
+                        :span-method="arraySpanMethod"
+                        border
+                        size="mini"
+                        style="width: 100%"
+                      >
+                        <el-table-column
+                          prop="insurance_name"
+                          label="承保险种"
+                          width="180"
+                        />
+                        <el-table-column
+                          prop="insurance_amount"
+                          label="保险金额/责任限额"
+                        >
+                          <template slot-scope="scope">
+                            {{ scope.row.insurance_amount=='1'?'投保':scope.row.insurance_amount }}
+                          </template>
+                        </el-table-column>
+                        <el-table-column
+                          prop="insurance_premium"
+                          label="保险费(元)"
+                        >
+                          <template slot-scope="scope">
+                            {{ scope.row.insurance_name=='交强险'?Tquote.forceTotal:scope.row.insurance_premium }}
+                          </template>
+                        </el-table-column>
+                      </el-table>
+                    </div>
 
-              </el-tab-pane>
-              <el-tab-pane label="平安" name="3">
-                <div v-if="activeNum==3" class="baojia">
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      车牌号：
-                    </el-col>
-                    <el-col span="20">
-                      {{ map.carInfo.carNumber }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      报价状态：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Pquote.quoteStatus==1?'报价成功':'报价失败' }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      报价内容：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Pquote.quoteResult }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      核保状态：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Pquote.submitStatus==1?'核保成功':'核保失败' }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="4">
-                      核保内容：
-                    </el-col>
-                    <el-col span="20">
-                      {{ Pquote.submitresult }}
-                    </el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="5">无赔款优惠系数:</el-col>
-                    <el-col span="3">{{ Pquote.noReparationSaleRate==null?0:Pquote.noReparationSaleRate }}<i
-                      class="el-icon-question"
-                      @click="youhui = true"
-                    /></el-col>
-                    <el-dialog
-                      :visible.sync="youhui"
-                      :before-close="handleClose"
-                      title="无赔款系数"
-                      width="30%"
-                      top="1vh"
-                      style="text-align: center"
-                    >
+                  </el-tab-pane>
+                  <el-tab-pane label="平安" name="3">
+                    <div v-if="activeNum==3" class="baojia">
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          车牌号：
+                        </el-col>
+                        <el-col span="20">
+                          {{ map.carInfo.carNumber }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          报价状态：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Pquote.quoteStatus==1?'报价成功':'报价失败' }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          报价内容：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Pquote.quoteResult }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          核保状态：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Pquote.submitStatus==1?'核保成功':'核保失败' }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="4">
+                          核保内容：
+                        </el-col>
+                        <el-col span="20">
+                          {{ Pquote.submitresult }}
+                        </el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="5">无赔款优惠系数:</el-col>
+                        <el-col span="3">{{ Pquote.noReparationSaleRate==null?0:Pquote.noReparationSaleRate }}<i
+                          class="el-icon-question"
+                          @click="youhui = true"
+                        /></el-col>
+                        <el-dialog
+                          :visible.sync="youhui"
+                          :before-close="handleClose"
+                          title="无赔款系数"
+                          width="30%"
+                          top="1vh"
+                          style="text-align: center"
+                        >
 
-                      <img src="http://bao.91bihu.com/resources/images/quote/rb.png" style="width: 66%">
-                    </el-dialog>
-                    <el-col span="4">自主渠道系数:</el-col>
-                    <el-col span="4">{{ Pquote.independentChannelDate==null?0:Pquote.independentChannelDate }}</el-col>
-                    <el-col span="4">自主核保系数:</el-col>
-                    <el-col span="4">{{ Pquote.independentSubmitRate==null?0:Pquote.independentSubmitRate }}</el-col>
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="5">交通违法浮动系数:</el-col>
-                    <el-col span="3">{{ Pquote.trafficIllegalRate==null?0:Pquote.trafficIllegalRate }}</el-col>
-                    <el-col span="4">折扣系数:</el-col>
-                    <el-col span="4">{{ Pquote.discountRate==null?0:Pquote.discountRate }}</el-col>
-                    <el-col span="8" />
-                  </el-row>
-                  <el-row class="bot-row">
-                    <el-col span="3">
-                      报价渠道：
-                    </el-col>
-                    <el-col span="21">
-                      保之顺
-                    </el-col>
-                  </el-row>
-                  <el-table
-                    :data="PquoteList"
-                    :span-method="arraySpanMethod"
-                    border
-                    size="mini"
-                    style="width: 100%"
-                  >
-                    <el-table-column
-                      prop="insurance_name"
-                      label="承保险种"
-                      width="180"
-                    />
-                    <el-table-column
-                      prop="insurance_amount"
-                      label="保险金额/责任限额"
-                    />
-                    <el-table-column
-                      prop="insurance_premium"
-                      label="保险费(元)"
-                    />
-                  </el-table>
-                </div>
+                          <img src="http://bao.91bihu.com/resources/images/quote/rb.png" style="width: 66%">
+                        </el-dialog>
+                        <el-col span="4">自主渠道系数:</el-col>
+                        <el-col span="4">{{ Pquote.independentChannelDate==null?0:Pquote.independentChannelDate }}</el-col>
+                        <el-col span="4">自主核保系数:</el-col>
+                        <el-col span="4">{{ Pquote.independentSubmitRate==null?0:Pquote.independentSubmitRate }}</el-col>
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="5">交通违法浮动系数:</el-col>
+                        <el-col span="3">{{ Pquote.trafficIllegalRate==null?0:Pquote.trafficIllegalRate }}</el-col>
+                        <el-col span="4">折扣系数:</el-col>
+                        <el-col span="4">{{ Pquote.discountRate==null?0:Pquote.discountRate }}</el-col>
+                        <el-col span="8" />
+                      </el-row>
+                      <el-row class="bot-row">
+                        <el-col span="3">
+                          报价渠道：
+                        </el-col>
+                        <el-col span="21">
+                          保之顺
+                        </el-col>
+                      </el-row>
+                      <el-table
+                        :data="PquoteList"
+                        :span-method="arraySpanMethod"
+                        border
+                        size="mini"
+                        style="width: 100%"
+                      >
+                        <el-table-column
+                          prop="insurance_name"
+                          label="承保险种"
+                          width="180"
+                        />
+                        <el-table-column
+                          prop="insurance_amount"
+                          label="保险金额/责任限额"
+                        >
+                          <template slot-scope="scope">
+                            {{ scope.row.insurance_amount=='1'?'投保':scope.row.insurance_amount }}
+                          </template>
+                        </el-table-column>
+                        <el-table-column
+                          prop="insurance_premium"
+                          label="保险费(元)"
+                        >
+                          <template slot-scope="scope">
+                            {{ scope.row.insurance_name=='交强险'?Pquote.forceTotal:scope.row.insurance_premium }}
+                          </template>
+                        </el-table-column>
+                      </el-table>
+                    </div>
 
-              </el-tab-pane>
-            </el-tabs>
+                  </el-tab-pane>
+                </el-tabs>
+              </el-col>
+            </el-row>
           </div>
           <div v-if="quoteMsg" class="baojia-div" style="height: 5em;text-align: center">
             <h5 style="padding-top: 2em">暂无报价信息</h5>
           </div>
         </el-tab-pane>
-
       </el-tabs>
     </div>
   </div>

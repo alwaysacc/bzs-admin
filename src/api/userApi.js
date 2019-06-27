@@ -62,9 +62,12 @@ export const getOrderDetails = (params) => {
 export const getListByAdmin = (params) => {
   return http.fetchPost('/verification/getListByAdmin', params)
 }
-
+// 提现
 export const updateVerificationStatus = (params) => {
   return http.fetchPost('/verification/updateVerificationStatus', params)
+}
+export const getVeriftcationDetail = (params) => {
+  return http.fetchPost('/verification/getVeriftcationDetail', params)
 }
 // 佣金提成
 export const commissionList = (params) => {

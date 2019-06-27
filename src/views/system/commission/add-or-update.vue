@@ -1,9 +1,10 @@
 <template>
   <el-dialog
+    :modal-append-to-body="false"
+    :append-to-body="true"
+    :visible.sync="visible"
     top="1vh"
     title="修改"
-    :modal-append-to-body='false'
-    :visible.sync="visible"
     width="500px"
   >
 
@@ -17,6 +18,12 @@
       <el-col style="text-align: right">商业险佣金：</el-col>
       <el-col style="text-align: left">
         <el-input v-model="commission.bizPercentage" placeholder="请输入内容" style="width: 200px" />
+      </el-col>
+    </el-row>
+    <el-row type="flex" class="row-bg is-justify-center padding-top">
+      <el-col style="text-align: right">商业险补贴：</el-col>
+      <el-col style="text-align: left">
+        <el-input v-model="commission.subsidy" placeholder="请输入内容" style="width: 200px" />
       </el-col>
     </el-row>
     <el-row type="flex" class="row-bg is-justify-center padding-top">
@@ -78,6 +85,7 @@
 
 <script>
 import { updateCommission } from '../../../api/userApi'
+
 export default {
   data() {
     return {
@@ -88,7 +96,8 @@ export default {
         source: '',
         forcePercentage: '',
         levelOne: '',
-        levelTwo: ''
+        levelTwo: '',
+        subsidy:''
       },
       updateStat: false
     }
@@ -112,10 +121,10 @@ export default {
     },
     // 表单提交
     dataFormSubmit() {
-      let user=JSON.parse(this.$store.getters.user)
+      const user = JSON.parse(this.$store.getters.user)
       this.visible = false
       const param = this.commission
-      param.updateBy=user.id
+      param.updateBy = user.id
       delete param.createTime
       delete param.updateTime
       console.log(param)

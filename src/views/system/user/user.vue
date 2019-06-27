@@ -7,7 +7,7 @@
             <el-input v-model="userName" placeholder="用户名" clearable />
           </el-form-item>
           <el-form-item>
-            <el-button @click="getDataList()">查询</el-button>
+            <el-button @click="toQuery">查询</el-button>
             <el-button type="primary" @click="addOrUpdate">新增</el-button>
             <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量删除</el-button>
           </el-form-item>
@@ -16,6 +16,7 @@
           :title="isAdd ? '新增' : '修改'"
           :visible.sync="dialog"
           :modal-append-to-body="false"
+          :append-to-body="true"
           top="1vh"
           width="500px"
         >
@@ -24,10 +25,10 @@
             <el-form-item label="姓名" prop="userName">
               <el-input v-model="dataForm.userName" placeholder="登录帐号" />
             </el-form-item>
-            <el-form-item label="账号" :prop="roleLoginName">
+            <el-form-item :prop="roleLoginName" label="账号">
               <el-input v-model="dataForm.loginName" :disabled="!isAdd" placeholder="登录帐号" @blur="checkLoginName"/>
             </el-form-item>
-            <el-form-item :class="{ 'is-required': !dataForm.id }" label="密码" :prop="roleLoginPwd">
+            <el-form-item :class="{ 'is-required': !dataForm.id }" :prop="roleLoginPwd" label="密码">
               <el-input v-model="dataForm.loginPwd" type="password" placeholder="密码" />
             </el-form-item>
             <!--      <el-form-item label="邮箱" prop="email">
@@ -135,7 +136,8 @@
             label="状态"
           >
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.accountState === '1'" size="small" type="danger">禁用</el-tag>
+              <el-tag v-if="scope.row.accountState === 1" size="small" type="danger">禁用</el-tag>
+              <el-tag v-else-if="scope.row.accountState === 2" size="small" type="warning">待审核</el-tag>
               <el-tag v-else size="small">正常</el-tag>
             </template>
           </el-table-column>
@@ -171,13 +173,13 @@
             <template slot-scope="scope">
               <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdate(scope.row)"/>
               <el-popover
-                :ref="scope.row.account_id"
+                :ref="scope.row.accountId"
                 placement="top"
                 width="160">
                 <p>确定删除吗？</p>
                 <div style="text-align: right; margin: 0">
-                  <el-button size="mini" type="text" @click="$refs[scope.row.account_id].doClose()">取消</el-button>
-                  <el-button type="primary" size="mini" @click="deleteUser(scope.row.account_id)">确定</el-button>
+                  <el-button size="mini" type="text" @click="$refs[scope.row.accountId].doClose()">取消</el-button>
+                  <el-button type="primary" size="mini" @click="deleteUser(scope.row.accountId)">确定</el-button>
                 </div>
                 <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
               </el-popover>
@@ -270,8 +272,8 @@ export default {
       userName: '',
       errMsg: true,
       stat: 0,
-      roleLoginName:'',
-      roleLoginPwd:'',
+      roleLoginName: '',
+      roleLoginPwd: ''
     }
   },
   activated() {
@@ -281,6 +283,23 @@ export default {
     this.getUserList()
   },
   methods: {
+    toQuery() {
+      this.dataListLoading = true
+      const params = {
+        userName: this.userName
+      }
+      getUserList(params).then(res => {
+        console.log(res)
+        if (res.code == 200) {
+          this.dataList = res.data.list
+          this.totalPage = res.data.total
+        } else {
+          this.dataList = []
+          this.totalPage = 0
+        }
+        this.dataListLoading = false
+      })
+    },
     getUserList() {
       this.dataListLoading = true
       const params = {
@@ -315,19 +334,19 @@ export default {
       } else {
         this.$refs['dataForm'].clearValidate()
       }
-      if (e.account_id) {
+      if (e.accountId) {
         this.dialog = true
         this.isAdd = false
         console.log(e)
         this.dataForm = e
         this.dataForm.accountState = Number(this.dataForm.accountState)
         this.dataForm.loginPwd = ''
-        this.roleLoginName=''
-        this.roleLoginPwd='loginPwd2'
+        this.roleLoginName = ''
+        this.roleLoginPwd = 'loginPwd2'
       } else {
         this.dataForm = {}
-        this.roleLoginName='loginName'
-        this.roleLoginPwd='loginPwd'
+        this.roleLoginName = 'loginName'
+        this.roleLoginPwd = 'loginPwd'
         this.dialog = true
       }
     },
@@ -348,6 +367,7 @@ export default {
             this.dialog = false
           } else {
             const param = this.dataForm
+            console.log(param)
             updateUser(param).then(res => {
               if (res.code === 200) {
                 this.$notify({

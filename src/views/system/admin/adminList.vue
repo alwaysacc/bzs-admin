@@ -2,8 +2,8 @@
   <div class="app-container">
     <div class="head-container">
       <!-- 搜索 -->
-      <!--      <el-input v-model="query.value" clearable placeholder="输入名称搜索" style="width: 200px;" class="filter-item" @keyup.enter.native="toQuery"/>-->
-      <!--      <el-button class="filter-item" size="mini" type="success" icon="el-icon-search" @click="toQuery">搜索</el-button>-->
+      <el-input v-model="adminName" clearable placeholder="输入名称搜索" style="width: 200px;" class="filter-item" @keyup.enter.native="toQuery"/>
+      <el-button class="filter-item" size="mini" type="success" icon="el-icon-search" @click="toQuery">搜索</el-button>
       <!-- 新增 -->
       <div v-permission="['ADMIN','ROLES_ALL','ROLES_CREATE']" style="display: inline-block;margin: 0px 2px;">
         <el-button
@@ -11,12 +11,12 @@
           type="primary"
           icon="el-icon-plus"
           @click="addOrUpdate">新增</el-button>
-        <eForm ref="form" :is-add="true"/>
       </div>
       <el-dialog
         :title="isAdd ? '新增' : '修改'"
         :visible.sync="dialog"
         :modal-append-to-body="false"
+        :append-to-body="true"
         top="1vh"
         width="500px"
       >
@@ -197,6 +197,7 @@ export default {
       })
     }
     return {
+      adminName: '',
       dataForm: {
         name: '',
         loginName: '',
@@ -268,6 +269,23 @@ export default {
     this.getAdminList()
   },
   methods: {
+    toQuery() {
+      this.dataListLoading = true
+      const params = {
+        adminName: this.adminName
+      }
+      getAdminList(params).then(res => {
+        console.log(res)
+        if (res.code == 200) {
+          this.dataList = res.data.list
+          this.totalPage = res.data.total
+        } else {
+          this.dataList = []
+          this.totalPage = 0
+        }
+        this.dataListLoading = false
+      })
+    },
     getAdminList() {
       this.dataListLoading = true
       const params = {
@@ -348,7 +366,8 @@ export default {
         this.isAdd = false
         this.dataForm = e
         this.dataForm.status = Number(this.dataForm.status)
-        this.dataForm.loginPwd = 'loginPwd2'
+        this.dataForm.loginPwd = ''
+        this.role = 'loginPwd2'
         this.roleLoginName = ''
       } else {
         this.dataForm = {}

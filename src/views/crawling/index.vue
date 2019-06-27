@@ -53,7 +53,7 @@
               show-file-list="false"
               class="upload-demo"
               multiple>
-              <el-button class="filter-item" size="mini" type="primary">点击上传</el-button>
+              <el-button class="filter-item" size="mini" type="primary">选择文件</el-button>
             </el-upload>
           </el-form-item>
           <div style="display: inline-block;margin: 0px 2px;"/>

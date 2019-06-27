@@ -4,9 +4,9 @@
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
 
         <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
-          <el-form-item>
+          <!--<el-form-item>
             <el-input v-model="dataForm.userName" placeholder="车牌号" clearable />
-          </el-form-item>
+          </el-form-item>-->
           <!--    <el-form-item>
             <el-button @click="getDataList()">查询</el-button>
             &lt;!&ndash;        <el-button type="primary" @click="addOrUpdateHandle()">新增</el-button>&ndash;&gt;
@@ -20,11 +20,17 @@
           style="width: 100%;"
           @selection-change="selectionChangeHandle"
         >
-          <el-table-column
+        <!--  <el-table-column
             type="selection"
             header-align="center"
             align="center"
             width="50"
+          />-->
+          <el-table-column
+            type="index"
+            width="50"
+            label="ID"
+            align="center"
           />
           <el-table-column
             prop="carNumber"
@@ -106,7 +112,7 @@
           >
             <template slot-scope="scope">
               <el-button type="primary" class="el-icon-view" size="small" @click="getQuoteDetail(scope.row.carInfoId)"/>
-              <el-popover
+              <!--<el-popover
                 :ref="scope.row.carInfoId"
                 placement="top"
                 width="160">
@@ -116,7 +122,7 @@
                   <el-button type="primary" size="mini" @click="deleteAdmin(scope.row.id)">确定</el-button>
                 </div>
                 <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
-              </el-popover>
+              </el-popover>-->
             </template>
           </el-table-column>
         </el-table>

@@ -15,6 +15,7 @@
         :title="isAdd ? '新增' : '修改'"
         :visible.sync="dialog"
         :modal-append-to-body="false"
+        :append-to-body="true"
         top="1vh"
         width="500px"
       >

@@ -19,16 +19,17 @@
           style="width: 100%;"
           @selection-change="selectionChangeHandle"
         >
-          <el-table-column
+        <!--  <el-table-column
             type="selection"
             header-align="center"
             align="center"
             width="50"
-          />
+          />-->
           <el-table-column
             type="index"
             width="50"
             label="ID"
+            align="center"
           />
           <el-table-column
             prop="user_name"
@@ -113,7 +114,7 @@
 
             <template slot-scope="scope">
               <el-button type="primary" class="el-icon-view" size="small" @click="getOrderDetail(scope.row.order_id)"/>
-              <el-popover
+            <!--  <el-popover
                 :ref="scope.row.order_id"
                 placement="top"
                 width="160">
@@ -123,7 +124,7 @@
                   <el-button type="primary" size="mini" @click="deleteAdmin(scope.row.id)">确定</el-button>
                 </div>
                 <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
-              </el-popover>
+              </el-popover>-->
             </template>
           </el-table-column>
         </el-table>

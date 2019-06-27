@@ -41,6 +41,12 @@
             label="商业险佣金"
           />
           <el-table-column
+            prop="subsidy"
+            header-align="center"
+            align="center"
+            label="商业险补贴"
+          />
+          <el-table-column
             prop="forcePercentage"
             header-align="center"
             align="center"

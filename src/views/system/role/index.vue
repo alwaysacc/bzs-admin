@@ -2,7 +2,7 @@
   <div class="app-container">
     <div class="head-container">
       <!-- 搜索 -->
-    <!--  <el-input v-model="query.value" clearable placeholder="输入名称搜索" style="width: 200px;" class="filter-item" @keyup.enter.native="toQuery"/>
+      <!--  <el-input v-model="query.value" clearable placeholder="输入名称搜索" style="width: 200px;" class="filter-item" @keyup.enter.native="toQuery"/>
       <el-button class="filter-item" size="mini" type="success" icon="el-icon-search" @click="toQuery">搜索</el-button>
  -->     <!-- 新增 -->
       <div style="display: inline-block;margin: 0px 2px;">
@@ -97,7 +97,7 @@
             label="操作"
           >
             <template slot-scope="scope">
-              <el-button type="primary" size="small" icon="el-icon-edit"  @click="addRole(scope.row)"></el-button>
+              <el-button type="primary" size="small" icon="el-icon-edit" @click="addRole(scope.row)"/>
               <el-popover
                 :ref="scope.row.id"
                 placement="top"
@@ -107,7 +107,7 @@
                   <el-button size="mini" type="text" @click="$refs[scope.row.id].doClose()">取消</el-button>
                   <el-button type="primary" size="mini" @click="deleteRole(scope.row.id)">确定</el-button>
                 </div>
-                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"></el-button>
+                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
               </el-popover>
             </template>
           </el-table-column>
@@ -232,6 +232,8 @@ export default {
           this.dialog = true
         })
       } else {
+        this.add = true
+        this.form = {}
         this.checkedArray = []
         this.getMenus()
         this.dialog = true
@@ -255,37 +257,46 @@ export default {
       })
     },
     doSubmit() {
-      if (this.isAdd) {
-        this.dialog = false
-
-        const param = this.form
-        param.menuId = JSON.stringify(this.$refs.tree.getCheckedKeys())
-        addRoleAndMenu(param).then(res => {
-          console.log(res)
-          this.$notify({
-            title: '保存成功',
-            type: 'success'
-          })
-        })
-        this.getRoleList()
-      } else {
-        delete this.form.createTime
-        console.log(this.form)
-        console.log(this.$refs.tree.getCheckedKeys())
-        console.log(this.checkedArray)
-        const param = this.form
-        param.menuId=JSON.stringify(this.$refs.tree.getCheckedKeys())
-        param.beforeMenuId=JSON.stringify(this.checkedArray)
-        updateRole(param).then(res => {
-          console.log(res)
-          this.$notify({
-            title: '操作成功',
-            type: 'success'
-          })
-        })
-        this.dialog = false
-        this.getRoleList()
-      }
+      this.$refs['form'].validate((valid) => {
+        if (valid) {
+          console.log(this.$refs.tree.getCheckedKeys().length)
+          if (this.$refs.tree.getCheckedKeys().length!=0) {
+            if (this.isAdd) {
+              this.dialog = false
+              const param = this.form
+              param.menuId = JSON.stringify(this.$refs.tree.getCheckedKeys())
+              addRoleAndMenu(param).then(res => {
+                console.log(res)
+                this.$notify({
+                  title: '保存成功',
+                  type: 'success'
+                })
+              })
+              this.getRoleList()
+            } else {
+              delete this.form.createTime
+              const param = this.form
+              param.menuId = JSON.stringify(this.$refs.tree.getCheckedKeys())
+              param.beforeMenuId = JSON.stringify(this.checkedArray)
+              updateRole(param).then(res => {
+                console.log(res)
+                this.$notify({
+                  title: '操作成功',
+                  type: 'success'
+                })
+              })
+              this.dialog = false
+              this.getRoleList()
+            }
+          }else{
+            this.$notify({
+              title: '请选择权限',
+              type: 'warning'
+            })
+            return
+          }
+        }
+      })
     },
     deleteRole(e) {
       console.log(e)

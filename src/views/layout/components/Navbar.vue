@@ -129,21 +129,25 @@ export default {
   },
   methods: {
     dataFormSubmit() {
-      const user = JSON.parse(this.$store.getters.user)
-      const param = {
-        id: user.id,
-        loginPwd: this.ruleForm.pass,
-        loginName: user.loginName
-      }
-      updateAdmin(param).then(res => {
-        console.log(res)
-        if (res.code === 200) {
-          this.$notify({
-            title: '操作成功',
-            type: 'success'
+      this.$refs['ruleForm'].validate((valid) => {
+        if (valid) {
+          const user = JSON.parse(this.$store.getters.user)
+          const param = {
+            id: user.id,
+            loginPwd: this.ruleForm.pass,
+            loginName: user.loginName
+          }
+          updateAdmin(param).then(res => {
+            console.log(res)
+            if (res.code === 200) {
+              this.$notify({
+                title: '操作成功',
+                type: 'success'
+              })
+            }
+            this.dialog = false
           })
         }
-        this.dialog = false
       })
     },
     open() {

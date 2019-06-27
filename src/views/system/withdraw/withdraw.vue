@@ -1,7 +1,7 @@
 <template>
   <div class="app-container">
     <el-row :gutter="20">
-      <el-col :xs="17" :sm="18" :md="24" :lg="24" :xl="24">
+      <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
         <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
           <el-form-item>
             <el-input v-model="dataForm.userName" placeholder="用户名" clearable />
@@ -120,7 +120,9 @@
             label="操作"
           >
             <template slot-scope="scope">
-              <el-button type="primary" size="small" @click="addOrUpdateHandle(scope.row.id)">审核</el-button>
+              <el-button :disabled="scope.row.status != '0'" type="primary" size="small" @click="addOrUpdateHandle(scope.row.id)">
+                {{ scope.row.status != '0'?'已审核':'审核' }}
+              </el-button>
               <!-- <el-button type="text" size="small" @click="addOrUpdateHandle(scope.row.id)">查看</el-button>-->
             </template>
           </el-table-column>
@@ -142,6 +144,12 @@
           title="提示"
           width="300px"
         >
+          <el-row type="flex" class="row-bg is-justify-space-around padding-top">
+            <el-col style="text-align: right">保险公司：</el-col>
+            <el-col style="text-align: left">
+              <el-input v-model="commission.source" placeholder="请输入内容" disabled style="width: 200px" />
+            </el-col>
+          </el-row>
           选择审核状态
           <el-radio v-model="status" label="1">通过</el-radio>
           <el-radio v-model="status" label="2">驳回</el-radio>
@@ -156,7 +164,7 @@
 </template>
 
 <script>
-import { getListByAdmin, updateVerificationStatus } from '../../../api/userApi'
+import { getListByAdmin, updateVerificationStatus, getVeriftcationDetail } from '../../../api/userApi'
 export default {
   components: {
   },
@@ -219,6 +227,12 @@ export default {
     },
     // 新增 / 修改
     addOrUpdateHandle(e) {
+      const params = {
+        id: e
+      }
+      getVeriftcationDetail(params).then(res => {
+        console.log(res)
+      })
       this.id = e
       this.dialogVisible = true
     },
@@ -254,7 +268,7 @@ export default {
         return item.id
       })
       this.dialogVisible = true
-      this.id=userIds.join(',')
+      this.id = userIds.join(',')
     }
   }
 }

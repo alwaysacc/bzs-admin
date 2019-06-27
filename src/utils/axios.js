@@ -1,6 +1,8 @@
 import axios from 'axios'
 import qs from 'qs'
 import { Notification } from 'element-ui'
+import NProgress from 'nprogress' // progress bar
+import 'nprogress/nprogress.css'// progress bar style
 axios.defaults.timeout = 100000
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
 // axios.defaults.baseURL = 'https://baozhishun.com/api'
@@ -17,8 +19,10 @@ export default {
     })
   },
   fetchPost(url, params = {}) {
+    NProgress.start()
     return new Promise((resolve, reject) => {
       axios.post(url, qs.stringify(params)).then(res => {
+        NProgress.done()
         const code = res.data.code
         if (code === 400) {
           Notification.error({
@@ -31,9 +35,13 @@ export default {
           })
           return Promise.reject('error')
         } else {
+          console.log(222)
           resolve(res.data)
         }
       }).catch(error => {
+        Notification.error({
+          title: '网络连接失败，请稍后重试'
+        })
         reject(error)
       })
     })
