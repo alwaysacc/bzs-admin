@@ -52,8 +52,8 @@ export const updateRole = (params) => {
   return http.fetchPost('/admin/role/updateRoleAndMenu', params)
 }
 // 订单
-export const getOrderList = (params) => {
-  return http.fetchPost('/orderinfo/getOrderList', params)
+export const getOrderListByAdmin = (params) => {
+  return http.fetchPost('/orderinfo/getOrderListByAdmin', params)
 }
 export const getOrderDetails = (params) => {
   return http.fetchPost('/orderinfo/getOrderDetail', params)

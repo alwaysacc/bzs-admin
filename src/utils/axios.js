@@ -24,24 +24,16 @@ export default {
       axios.post(url, qs.stringify(params)).then(res => {
         NProgress.done()
         const code = res.data.code
-        if (code === 400) {
-          Notification.error({
-            title: res.data.message
-          })
+        if (code === 200) {
+          resolve(res.data)
           return Promise.reject('error')
-        } else if (code === 500) {
+        } else {
           Notification.error({
             title: '内部错误'
           })
           return Promise.reject('error')
-        } else {
-          console.log(222)
-          resolve(res.data)
         }
       }).catch(error => {
-        Notification.error({
-          title: '网络连接失败，请稍后重试'
-        })
         reject(error)
       })
     })

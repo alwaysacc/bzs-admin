@@ -19,7 +19,7 @@
           style="width: 100%;"
           @selection-change="selectionChangeHandle"
         >
-        <!--  <el-table-column
+          <!--  <el-table-column
             type="selection"
             header-align="center"
             align="center"
@@ -62,10 +62,30 @@
             label="投保公司"
           />
           <el-table-column
+            prop="biz_total"
+            header-align="center"
+            align="center"
+            width="100"
+            label="商业险保费"
+          />
+          <el-table-column
+            prop="force_total"
+            header-align="center"
+            align="center"
+            width="100"
+            label="交强险保费"
+          />
+          <el-table-column
+            prop="tax_total"
+            header-align="center"
+            align="center"
+            label="车船税"
+          />
+          <el-table-column
             prop="pay_money"
             header-align="center"
             align="center"
-            label="订单金额"
+            label="订单总额"
           />
           <el-table-column
             prop="pay_status"
@@ -145,7 +165,7 @@
 </template>
 
 <script>
-import { getOrderList } from '../../../api/userApi'
+import { getOrderListByAdmin } from '../../../api/userApi'
 export default {
   components: {
   },
@@ -170,7 +190,7 @@ export default {
     this.getOrderList()
   },
   methods: {
-    getOrderDetail(e){
+    getOrderDetail(e) {
       this.$router.push({ path: '/orderDetail', query: { order_id: e }})
     },
     getOrderList() {
@@ -179,9 +199,9 @@ export default {
         page: this.pageIndex,
         size: this.pageSize
       }
-      getOrderList(params).then(res => {
+      getOrderListByAdmin(params).then(res => {
         console.log(res)
-        if (res.code == 200) {
+        if (res.code === 200) {
           this.dataList = res.data.list
           this.totalPage = res.data.total
         } else {
