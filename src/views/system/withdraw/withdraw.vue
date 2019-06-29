@@ -105,8 +105,8 @@
             label="打款状态"
           >
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.accountState === '0'" size="small" type="danger">禁用</el-tag>
-              <el-tag v-else size="small">正常</el-tag>
+              <el-tag v-if="scope.row.isPay === '0'" size="small" type="danger">未打款</el-tag>
+              <el-tag v-else size="small">已打款</el-tag>
             </template>
           </el-table-column>
           <!-- <el-table-column
@@ -127,7 +127,7 @@
               <el-button :disabled="scope.row.status != '0'" type="primary" size="small" @click="addOrUpdateHandle(scope.row.id)">
                 {{ scope.row.status != '0'?'已审核':'审核' }}
               </el-button>
-              <el-button type="primary" size="small" @click="addOrUpdateHandle(scope.row.id)">打款</el-button>
+              <el-button :disabled="scope.row.status != '1'" type="primary" size="small" @click="pay(scope.row.id)"> {{ scope.row.status != '1'?'未审核':'打款' }}</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -167,9 +167,9 @@
       <el-row type="flex" justify="center" class="row-bg">
         <el-col span="8">
           提现方式：
-          <a v-if="map.status==0">支付宝</a>
-          <a v-if="map.status==1">微信</a>
-          <a v-if="map.status==2">银行卡</a>
+          <a v-if="map.type==0">支付宝</a>
+          <a v-if="map.type==1">微信</a>
+          <a v-if="map.type==2">银行卡</a>
         </el-col>
         <el-col span="8">
           提现账户：{{ map.amount }}
@@ -181,18 +181,18 @@
         </el-col>
         <el-col span="8"/>
       </el-row>
-      <el-row v-if="status!=0" type="flex" justify="center" class="row-bg">
+      <el-row v-if="stat" type="flex" justify="center" class="row-bg">
         <el-col span="16">
           是否打款：&nbsp;
-          <el-radio v-model="status" label="3">是</el-radio>
-          <el-radio v-model="status" label="5">否</el-radio>
+          <el-radio v-model="map.isPay" label="1">是</el-radio>
+          <el-radio v-model="map.isPay" label="0">否</el-radio>
         </el-col>
       </el-row>
-      <el-row v-if="status==0" type="flex" justify="center" class="row-bg">
+      <el-row v-if="!stat" type="flex" justify="center" class="row-bg">
         <el-col span="16">
           选择审核状态：&nbsp;
-          <el-radio v-model="status" label="1">通过</el-radio>
-          <el-radio v-model="status" label="2">驳回</el-radio>
+          <el-radio v-model="map.status" label="1">通过</el-radio>
+          <el-radio v-model="map.status" label="2">驳回</el-radio>
         </el-col>
       </el-row>
 
@@ -213,7 +213,7 @@ export default {
   data() {
     return {
       dialogVisible: false,
-      status: '1',
+      status: '',
       dataForm: {
         userName: ''
       },
@@ -225,7 +225,8 @@ export default {
       dataListSelections: [],
       addOrUpdateVisible: false,
       id: '',
-      map: ''
+      map: '',
+      stat: false
     }
   },
   created() {
@@ -265,7 +266,20 @@ export default {
     selectionChangeHandle(val) {
       this.dataListSelections = val
     },
-    // 新增 / 修改
+    pay(e) {
+      this.stat = true
+      const params = {
+        id: e
+      }
+      getVeriftcationDetail(params).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          this.map = res.data
+        }
+      })
+      this.id = e
+      this.dialogVisible = true
+    },
     addOrUpdateHandle(e) {
       const params = {
         id: e
@@ -280,16 +294,12 @@ export default {
       this.dialogVisible = true
     },
     updateStat() {
-      if (this.status === '5') {
-        console.log(111)
-        this.dialogVisible = false
-      } else {
-        const user = JSON.parse(this.$store.getters.user)
-        console.log(user)
+      const user = JSON.parse(this.$store.getters.user)
+      /*      if (this.stat) {
         this.dialogVisible = false
         const params = {
           id: this.id,
-          status: this.status,
+          isPay: this.map.isPay,
           userName: user.name
         }
         updateVerificationStatus(params).then(res => {
@@ -308,7 +318,32 @@ export default {
           }
           this.dataListLoading = false
         })
+      } else {*/
+      console.log(user)
+      this.dialogVisible = false
+      const params = {
+        id: this.id,
+        isPay: this.map.isPay,
+        status: this.map.status,
+        userName: user.name
       }
+      updateVerificationStatus(params).then(res => {
+        console.log(res)
+        if (res.code == 200) {
+          this.$notify({
+            title: '操作成功',
+            type: 'success'
+          })
+          this.getListByAdmin()
+        } else {
+          this.$message({
+            message: res.message
+          })
+          this.getListByAdmin()
+        }
+        this.dataListLoading = false
+      })
+      // }
     },
     // 删除
     deleteHandle(id) {

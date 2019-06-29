@@ -4,14 +4,23 @@
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
 
         <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
-          <!--<el-form-item>
-            <el-input v-model="dataForm.userName" placeholder="车牌号" clearable />
-          </el-form-item>-->
-          <!--    <el-form-item>
-            <el-button @click="getDataList()">查询</el-button>
-            &lt;!&ndash;        <el-button type="primary" @click="addOrUpdateHandle()">新增</el-button>&ndash;&gt;
-            <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量删除</el-button>
-          </el-form-item>-->
+          <el-form ref="queryForm" :inline="true" :model="queryForm" :rules="rule" @keyup.enter.native="toQuery()">
+            <el-form-item prop="type">
+              <el-select v-model="queryForm.type" filterable placeholder="选择查询方式">
+                <el-option
+                  v-for="item in array"
+                  :key="item.id"
+                  :label="item.name"
+                  :value="item.id"/>
+              </el-select>
+            </el-form-item>
+            <el-form-item prop="userName">
+              <el-input v-model="queryForm.userName" :placeholder="queryForm.type==0?'报价人':'车牌号'" clearable />
+            </el-form-item>
+            <el-form-item>
+              <el-button type="primary" @click="toQuery">查询</el-button>
+            </el-form-item>
+          </el-form>
         </el-form>
         <el-table
           v-loading="dataListLoading"
@@ -20,7 +29,7 @@
           style="width: 100%;"
           @selection-change="selectionChangeHandle"
         >
-        <!--  <el-table-column
+          <!--  <el-table-column
             type="selection"
             header-align="center"
             align="center"
@@ -39,16 +48,34 @@
             label="车牌号"
           />
           <el-table-column
+            prop="frameNumber"
+            header-align="center"
+            align="center"
+            label="车架号"
+            width="120"
+          />
+          <el-table-column
             prop="userName"
             header-align="center"
             align="center"
             label="报价人"
           />
           <el-table-column
+            prop="userName"
+            header-align="center"
+            align="center"
+            label="上年投保"
+          >
+            <template slot-scope="scope">
+              {{ scope.row.insuredInfo!=null?scope.row.insuredInfo.lastYearInsuranceCompany:'' }}
+            </template>
+          </el-table-column>
+          <el-table-column
             prop="mobile"
             header-align="center"
             align="center"
             label="保险公司"
+            width="100"
           >
             <template slot-scope="scope">
               <p v-for="item in scope.row.quoteInfoList">{{ item.quoteInsuranceName }}</p>
@@ -85,12 +112,14 @@
             header-align="center"
             align="center"
             label="品牌型号"
+            show-overflow-tooltip="true"
           />
           <el-table-column
             prop="registerDate"
             header-align="center"
             align="center"
             label="注册日期"
+            width="90"
           />
           <el-table-column
             prop="createdTime"
@@ -107,7 +136,7 @@
             fixed="right"
             header-align="center"
             align="center"
-            width="150"
+            width="80"
             label="操作"
           >
             <template slot-scope="scope">
@@ -185,7 +214,23 @@ export default {
       addOrUpdateVisible: false,
       dialogVisible: false,
       activeName: 'first',
-      map: {}
+      map: {},
+      queryForm: {
+        type: '',
+        userName: ''
+      },
+      rule: {
+        type: [
+          { required: true, message: '必选', trigger: 'blur' }
+        ],
+        userName:
+          [{ required: true, message: '必填', trigger: 'blur' }
+          ]
+      },
+      array: [
+        { id: 0, name: '报价人' },
+        { id: 1, name: '车牌号' }
+      ]
     }
   },
   activated() {

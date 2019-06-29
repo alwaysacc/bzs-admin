@@ -2,12 +2,21 @@
   <div class="app-container">
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <el-form :inline="true" :model="userName" @keyup.enter.native="getDataList()">
-          <el-form-item>
-            <el-input v-model="userName" placeholder="用户名" clearable />
+        <el-form :inline="true" ref="queryForm" :model="queryForm" :rules="rule" @keyup.enter.native="toQuery()">
+          <el-form-item prop="type">
+            <el-select v-model="queryForm.type" filterable placeholder="选择查询方式">
+              <el-option
+                v-for="item in array"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item prop="userName">
+            <el-input v-model="queryForm.userName" :placeholder="queryForm.type==0?'用户名':'手机号'" clearable />
           </el-form-item>
           <el-form-item>
-            <el-button @click="toQuery">查询</el-button>
+            <el-button type="primary" @click="toQuery">查询</el-button>
             <el-button type="primary" @click="addOrUpdate">新增</el-button>
             <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量删除</el-button>
           </el-form-item>
@@ -23,10 +32,10 @@
           <el-form ref="dataForm" :model="dataForm" :rules="rules" label-width="80px" @keyup.enter.native="dataFormSubmit()">
 
             <el-form-item label="姓名" prop="userName">
-              <el-input v-model="dataForm.userName" placeholder="登录帐号" />
+              <el-input v-model="dataForm.userName" placeholder="姓名" />
             </el-form-item>
             <el-form-item :prop="roleLoginName" label="账号">
-              <el-input v-model="dataForm.loginName" :disabled="!isAdd" placeholder="登录帐号" @blur="checkLoginName"/>
+              <el-input v-model="dataForm.loginName" :disabled="!isAdd" placeholder="登录帐号"/>
             </el-form-item>
             <el-form-item :class="{ 'is-required': !dataForm.id }" :prop="roleLoginPwd" label="密码">
               <el-input v-model="dataForm.loginPwd" type="password" placeholder="密码" />
@@ -212,7 +221,7 @@ export default {
       }
       const c = callback
       checkUserLoginName(param).then(res => {
-        if (res) {
+        if (res.data) {
           c(new Error('账号已存在'))
         } else {
           c()
@@ -221,7 +230,20 @@ export default {
     }
     return {
       dataForm: {
+        userName: '',
+        type: ''
+      },
+      queryForm: {
+        type: '',
         userName: ''
+      },
+      rule: {
+        type: [
+          { required: true, message: '必选', trigger: 'blur' }
+        ],
+        userName:
+          [{ required: true, message: '必填', trigger: 'blur' }
+          ]
       },
       rules: {
         loginName: [
@@ -273,7 +295,11 @@ export default {
       errMsg: true,
       stat: 0,
       roleLoginName: '',
-      roleLoginPwd: ''
+      roleLoginPwd: '',
+      array: [
+        { id: 0, name: '用户名' },
+        { id: 1, name: '手机号' }
+      ]
     }
   },
   activated() {
@@ -284,20 +310,27 @@ export default {
   },
   methods: {
     toQuery() {
-      this.dataListLoading = true
-      const params = {
-        userName: this.userName
-      }
-      getUserList(params).then(res => {
-        console.log(res)
-        if (res.code == 200) {
-          this.dataList = res.data.list
-          this.totalPage = res.data.total
-        } else {
-          this.dataList = []
-          this.totalPage = 0
+      this.$refs['queryForm'].validate((valid) => {
+        if (valid) {
+          this.dataListLoading = true
+          const params = {}
+          if (this.queryForm.type === 0) {
+            params.userName = this.queryForm.userName
+          } else {
+            params.mobile = this.queryForm.userName
+          }
+          getUserList(params).then(res => {
+            console.log(res)
+            if (res.code === 200) {
+              this.dataList = res.data.list
+              this.totalPage = res.data.total
+            } else {
+              this.dataList = []
+              this.totalPage = 0
+            }
+            this.dataListLoading = false
+          })
         }
-        this.dataListLoading = false
       })
     },
     getUserList() {
@@ -418,7 +451,7 @@ export default {
     // 删除
     deleteHandle(id) {
       var userIds = id ? [id] : this.dataListSelections.map(item => {
-        return item.account_id
+        return item.accountId
       })
       this.$confirm(`确认删除?`, '提示', {
         confirmButtonText: '确定',

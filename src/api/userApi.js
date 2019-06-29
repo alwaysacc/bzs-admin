@@ -19,6 +19,9 @@ export const deleteUser = (params) => {
 export const checkUserLoginName = (params) => {
   return http.fetchPost('/account/info/checkUserLoginName', params)
 }
+export const getUserNameList = (params) => {
+  return http.fetchPost('/account/info/getUserNameList', params)
+}
 // 管理员
 export const adminLogin = (params) => {
   return http.fetchPost('/admin/login', params)
@@ -75,6 +78,9 @@ export const commissionList = (params) => {
 }
 export const updateCommission = (params) => {
   return http.fetchPost('/commission/percentage/update', params)
+}
+export const getDrawCashList = (params) => {
+  return http.fetchPost('/draw/cash/getDrawCashList', params)
 }
 // 菜单
 export const getMenuByAdminName = (params) => {
