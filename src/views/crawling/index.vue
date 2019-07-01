@@ -92,6 +92,7 @@
             header-align="center"
             align="center"
             label="创建时间"
+            width="150"
           >
             <template slot-scope="scope">
               {{ util.formatTime(scope.row.createTime) }}
@@ -107,7 +108,6 @@
             prop="superiorinvitecode"
             header-align="center"
             align="center"
-            width="180"
             label="爬取方式"
           >
             <template slot-scope="scope">
@@ -124,6 +124,16 @@
               <el-tag v-if="scope.row.status == '0'" size="small" type="danger">未爬取</el-tag>
               <el-tag v-else-if="scope.row.status == '1'" size="small">完成</el-tag>
               <el-tag v-else size="small">正在爬取</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="status"
+            header-align="center"
+            align="center"
+            label="进度"
+          >
+            <template slot-scope="scope">
+              <el-progress :percentage="scope.row.percentage" :color="customColors"/>
             </template>
           </el-table-column>
           <el-table-column
@@ -162,12 +172,14 @@
 </template>
 
 <script>
-import { getCrawlingList, startCrawling } from '../../api/userApi'
+import { getCrawlingList, startCrawling, getProgress } from '../../api/userApi'
 export default {
   components: {
   },
   data() {
     return {
+      percentage: 20,
+      customColors: '#409eff',
       dateScopes: ['全部', '本级', '自定义'],
       loading: false, dialog: false, depts: [], deptIds: [],
       form: { name: '', depts: [], remark: '', dataScope: '本级', level: 3 },
@@ -197,13 +209,37 @@ export default {
       uploadStat: false
     }
   },
-  activated() {
-    this.getCrawlingList()
-  },
   created() {
     this.getCrawlingList()
+    this.initList()
+  },
+  destroyed() {
+    clearInterval(this.myInterval)
   },
   methods: {
+    initList() {
+      this.myInterval = window.setInterval(() => {
+        setTimeout(() => {
+          this.getProgress() // 调用接口的方法
+        }, 0)
+      }, 2000)
+    },
+    getProgress() {
+      for (let i = 0; i < this.dataList.length; i++) {
+        console.log(this.dataList[i])
+        if (this.dataList[i].status === '3') {
+          const params = {
+            seriesNo: this.dataList[i].seriesNo
+          }
+          console.log(1111)
+          getProgress(params).then(res => {
+            console.log(res)
+            this.dataList[i].percentage = res.data / this.dataList[i].total * 100
+          })
+        }
+      }
+      console.log('getProgress')
+    },
     submitUpload() {
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {

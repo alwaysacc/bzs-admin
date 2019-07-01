@@ -110,6 +110,9 @@ export const startCrawling = (params) => {
 export const exportCrawlingDataList = (params) => {
   return http.fetchGet('/crawling/carinfo/exportCrawlingDataList?seriesNo=' + params, '')
 }
+export const getProgress = (params) => {
+  return http.fetchPost('/crawling/carinfo/getProgress', params)
+}
 export const getCrawlingAdminList = (params) => {
   return http.fetchPost('/thirdAccount/getCrawlingAdminList', params)
 }

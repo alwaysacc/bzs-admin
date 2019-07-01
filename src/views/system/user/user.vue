@@ -2,7 +2,7 @@
   <div class="app-container">
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <el-form :inline="true" ref="queryForm" :model="queryForm" :rules="rule" @keyup.enter.native="toQuery()">
+        <el-form ref="queryForm" :inline="true" :model="queryForm" :rules="rule" @keyup.enter.native="toQuery()">
           <el-form-item prop="type">
             <el-select v-model="queryForm.type" filterable placeholder="选择查询方式">
               <el-option
@@ -68,8 +68,8 @@
           v-loading="dataListLoading"
           :data="dataList"
           border
+          size="mini"
           style="width: 100%;"
-          @selection-change="selectionChangeHandle"
         >
           <el-table-column
             type="selection"

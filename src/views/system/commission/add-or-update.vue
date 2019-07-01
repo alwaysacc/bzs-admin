@@ -11,7 +11,7 @@
     <el-row type="flex" class="row-bg is-justify-space-around padding-top">
       <el-col style="text-align: right">保险公司：</el-col>
       <el-col style="text-align: left">
-        <el-input v-model="commission.source" placeholder="请输入内容" disabled style="width: 200px" />
+        <el-input v-model="commission.sourceName" placeholder="请输入内容" disabled style="width: 200px" />
       </el-col>
     </el-row>
     <el-row type="flex" class="row-bg is-justify-center padding-top">
@@ -107,13 +107,13 @@ export default {
       this.commission = e
       switch (this.commission.source) {
         case '1':
-          this.commission.source = '太平洋保险'
+          this.commission.sourceName = '太平洋保险'
           break
         case '2':
-          this.commission.source = '平安保险'
+          this.commission.sourceName = '平安保险'
           break
         case '4':
-          this.commission.source = '人保保险'
+          this.commission.sourceName = '人保保险'
           break
       }
       this.visible = true
@@ -127,6 +127,7 @@ export default {
       param.updateBy = user.id
       delete param.createTime
       delete param.updateTime
+      delete param.source
       console.log(param)
       updateCommission(param).then(res => {
         console.log(res)

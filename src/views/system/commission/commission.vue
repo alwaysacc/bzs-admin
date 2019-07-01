@@ -31,7 +31,9 @@
             label="保险公司"
           >
             <template slot-scope="scope">
-              <el-tag size="small">{{ scope.row.source }}</el-tag>
+              <el-tag v-if="scope.row.source==1" size="small">太平洋</el-tag>
+              <el-tag v-if="scope.row.source==2" size="small">平安</el-tag>
+              <el-tag v-if="scope.row.source==4" size="small">人保</el-tag>
             </template>
           </el-table-column>
           <el-table-column

@@ -3,7 +3,7 @@
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
         <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
-          <el-form-item>
+          <el-form-item label="选择用户：">
             <el-select v-model="dataForm.userName" filterable placeholder="选择用户">
               <el-option
                 v-for="item in userNameList"
@@ -12,7 +12,19 @@
                 :value="item.account_id"/>
             </el-select>
           </el-form-item>
-          <el-form-item>
+          <el-form-item label="选择查询日期：">
+            <el-date-picker
+              v-model="dataForm.createTime"
+              :picker-options="pickerOptions"
+              type="daterange"
+              align="right"
+              unlink-panels
+              value-format="yyyy-MM-dd"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"/>
+          </el-form-item>
+          <!-- <el-form-item>
             <el-select v-model="dataForm.type" filterable placeholder="选择类型">
               <el-option
                 v-for="item in typeList"
@@ -20,7 +32,7 @@
                 :label="item.name"
                 :value="item.id"/>
             </el-select>
-          </el-form-item>
+          </el-form-item>-->
           <el-form-item>
             <el-button type="primary" @click="getDrawCashList()">查询</el-button>
           </el-form-item>
@@ -267,10 +279,55 @@ export default {
   },
   data() {
     return {
+      pickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近一个月',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近三个月',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近半年',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 180)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近一年',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 365)
+            picker.$emit('pick', [start, end])
+          }
+        }
+        ]
+      },
       dialogVisible: false,
       status: '1',
       dataForm: {
-        userName: ''
+        userName: '',
+        createTime: ''
       },
       dataList: [],
       pageIndex: 1,
@@ -305,6 +362,9 @@ export default {
         page: this.pageIndex,
         size: this.pageSize,
         incomePerson: this.dataForm.userName
+      }
+      if (this.dataForm.createTime != '') {
+        params.createTime = JSON.stringify(this.dataForm.createTime)
       }
       getDrawCashList(params).then(res => {
         console.log(res)

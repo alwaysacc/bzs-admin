@@ -3,24 +3,33 @@
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
 
-        <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
-          <el-form ref="queryForm" :inline="true" :model="queryForm" :rules="rule" @keyup.enter.native="toQuery()">
-            <el-form-item prop="type">
-              <el-select v-model="queryForm.type" filterable placeholder="选择查询方式">
-                <el-option
-                  v-for="item in array"
-                  :key="item.id"
-                  :label="item.name"
-                  :value="item.id"/>
-              </el-select>
-            </el-form-item>
-            <el-form-item prop="userName">
-              <el-input v-model="queryForm.userName" :placeholder="queryForm.type==0?'报价人':'车牌号'" clearable />
-            </el-form-item>
-            <el-form-item>
-              <el-button type="primary" @click="toQuery">查询</el-button>
-            </el-form-item>
-          </el-form>
+        <el-form ref="queryForm" :inline="true" :model="queryForm" :rules="rule" @keyup.enter.native="toQuery()">
+          <el-form-item prop="type">
+            <el-select v-model="queryForm.type" filterable placeholder="选择查询方式">
+              <el-option
+                v-for="item in array"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item prop="userName">
+            <el-input v-if="queryForm.type!=2" v-model="queryForm.userName" :placeholder="queryForm.type==0?'报价人':'车牌号'" clearable />
+            <el-date-picker
+              v-else
+              v-model="queryForm.userName"
+              :picker-options="pickerOptions"
+              type="daterange"
+              align="right"
+              unlink-panels
+              value-format="yyyy-MM-dd"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"/></el-form-item>
+
+          <el-form-item>
+            <el-button type="primary" @click="toQuery">查询</el-button>
+          </el-form-item>
         </el-form>
         <el-table
           v-loading="dataListLoading"
@@ -52,7 +61,7 @@
             header-align="center"
             align="center"
             label="车架号"
-            width="120"
+            width="150"
           />
           <el-table-column
             prop="userName"
@@ -202,6 +211,33 @@ export default {
   },
   data() {
     return {
+      pickerOptions: {
+        shortcuts: [{
+          text: '最近一周',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近一个月',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近三个月',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+            picker.$emit('pick', [start, end])
+          }
+        }]
+      },
       dataForm: {
         userName: ''
       },
@@ -229,7 +265,8 @@ export default {
       },
       array: [
         { id: 0, name: '报价人' },
-        { id: 1, name: '车牌号' }
+        { id: 1, name: '车牌号' },
+        { id: 2, name: '时间范围' }
       ]
     }
   },
@@ -240,6 +277,38 @@ export default {
     this.getUserList()
   },
   methods: {
+    toQuery() {
+      console.log(this.queryForm)
+      this.$refs['queryForm'].validate((valid) => {
+        if (valid) {
+          this.dataListLoading = true
+          const params = {
+            // createBy: this.queryForm.userName,
+            // carNo: this.queryForm.userName,
+            page: this.pageIndex,
+            size: this.pageSize * 10
+          }
+          if (this.queryForm.type === 0) {
+            params.createBy = this.queryForm.userName
+          } else if (this.queryForm.type === 1) {
+            params.carNo = this.queryForm.userName
+          } else {
+            params.queryTime = JSON.stringify(this.queryForm.userName)
+          }
+          getCarInfoQuote(params).then(res => {
+            console.log(res)
+            if (res.code === 200) {
+              this.dataList = res.data.list
+              this.totalPage = Math.ceil(res.data.total / 10)
+            } else {
+              this.dataList = []
+              this.totalPage = 0
+            }
+            this.dataListLoading = false
+          })
+        }
+      })
+    },
     getQuoteDetail(e) {
       this.$router.push({ path: '/quoteDetail', query: { car_info_id: e }})
     },
