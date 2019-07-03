@@ -15,6 +15,18 @@
       </el-col>
     </el-row>
     <el-row type="flex" class="row-bg is-justify-center padding-top">
+      <el-col style="text-align: right">保司商业险佣金：</el-col>
+      <el-col style="text-align: left">
+        <el-input v-model="commission.insuranceBizPercentage" placeholder="请输入内容" style="width: 200px" />
+      </el-col>
+    </el-row>
+    <el-row type="flex" class="row-bg is-justify-center padding-top">
+      <el-col style="text-align: right">保司交强险佣金：</el-col>
+      <el-col style="text-align: left">
+        <el-input v-model="commission.insuranceForcePercentage" placeholder="请输入内容" style="width: 200px" />
+      </el-col>
+    </el-row>
+    <el-row type="flex" class="row-bg is-justify-center padding-top">
       <el-col style="text-align: right">商业险佣金：</el-col>
       <el-col style="text-align: left">
         <el-input v-model="commission.bizPercentage" placeholder="请输入内容" style="width: 200px" />
@@ -97,7 +109,7 @@ export default {
         forcePercentage: '',
         levelOne: '',
         levelTwo: '',
-        subsidy:''
+        subsidy: ''
       },
       updateStat: false
     }
@@ -145,7 +157,7 @@ export default {
   }
 }
 </script>
-<style>
+<style >
   .padding-top{
     height: 2.5rem;
     line-height: 2.5rem;

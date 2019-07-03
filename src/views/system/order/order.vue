@@ -2,15 +2,31 @@
   <div class="app-container">
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
-          <el-form-item>
-            <el-input v-model="dataForm.userName" placeholder="车牌号" clearable />
+        <el-form ref="queryForm" :inline="true" :model="queryForm" :rules="rule" @keyup.enter.native="toQuery()">
+          <el-form-item prop="type">
+            <el-select v-model="queryForm.type" filterable placeholder="选择查询方式">
+              <el-option
+                v-for="item in array"
+                :key="item.id"
+                :label="item.name"
+                :value="item.id"/>
+            </el-select>
+          </el-form-item>
+          <el-form-item prop="userName">
+            <el-input v-model="queryForm.userName" :placeholder="queryForm.type==0?'车牌号':'创建人'" clearable />
           </el-form-item>
           <el-form-item>
-            <el-button @click="getDataList()">查询</el-button>
+            <el-button type="primary" @click="toQuery">查询</el-button>
             <!--        <el-button type="primary" @click="addOrUpdateHandle()">新增</el-button>-->
             <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量删除</el-button>
           </el-form-item>
+          <el-tabs v-model="activeName" @tab-click="handleClick">
+            <el-tab-pane label="全部" name="9"/>
+            <el-tab-pane label="待支付" name="0"/>
+            <el-tab-pane label="已承保" name="1"/>
+            <el-tab-pane label="已取消" name="2"/>
+            <el-tab-pane label="已过期" name="3"/>
+          </el-tabs>
         </el-form>
         <el-table
           v-loading="dataListLoading"
@@ -42,7 +58,7 @@
             header-align="center"
             align="center"
             label="创建时间"
-            width="160"
+            width="150"
           >
             <template slot-scope="scope">
               {{ util.formatTime(scope.row.create_time) }}
@@ -56,6 +72,21 @@
             label="车牌号"
           />
           <el-table-column
+            prop="brand_model"
+            header-align="center"
+            align="center"
+            label="车型"
+            show-overflow-tooltip="true"
+          />
+          <el-table-column
+            prop="license_owner"
+            header-align="center"
+            align="center"
+            label="投保人"
+            show-overflow-tooltip="true"
+          />
+          <el-table-column
+            :formatter="sourceName"
             prop="quote_insurance_name"
             header-align="center"
             align="center"
@@ -104,7 +135,6 @@
             prop="payment"
             header-align="center"
             align="center"
-            width="180"
             label="支付方式"
           >
             <template slot-scope="scope">
@@ -117,7 +147,7 @@
             prop="finish_time"
             header-align="center"
             align="center"
-            width="180"
+            width="150"
             label="完成时间"
           >
             <template slot-scope="scope">
@@ -128,7 +158,6 @@
             fixed="right"
             header-align="center"
             align="center"
-            width="150"
             label="操作"
           >
 
@@ -171,7 +200,8 @@ export default {
   },
   data() {
     return {
-      dataForm: {
+      queryForm: {
+        type: '',
         userName: ''
       },
       dataList: [],
@@ -180,52 +210,71 @@ export default {
       totalPage: 0,
       dataListLoading: false,
       dataListSelections: [],
-      addOrUpdateVisible: false
+      addOrUpdateVisible: false,
+      activeName:'9',
+      rule: {
+        type: [
+          { required: true, message: '必选', trigger: 'blur' }
+        ],
+        userName:
+          [{ required: true, message: '必填', trigger: 'blur' }
+          ]
+      },
+      array: [
+        { id: 0, name: '车牌号' },
+        { id: 1, name: '创建人' }
+      ]
     }
   },
   activated() {
     this.getOrderList()
   },
   created() {
-    this.getOrderList()
+    this.getOrderList(9)
   },
   methods: {
+    toQuery() {
+      this.$refs['queryForm'].validate((valid) => {
+        if (valid) {
+          this.dataListLoading = true
+          const params = {
+            page: this.pageIndex,
+            size: this.pageSize
+          }
+          if (this.queryForm.type === 0) {
+            params.carNumber = this.queryForm.userName
+          } else {
+            params.userName = this.queryForm.userName
+          }
+          getOrderListByAdmin(params).then(res => {
+            console.log(res)
+            if (res.code === 200) {
+              this.dataList = res.data.list
+              this.totalPage = res.data.total
+            } else {
+              this.dataList = []
+              this.totalPage = 0
+            }
+            this.dataListLoading = false
+          })
+        }
+      })
+    },
     getOrderDetail(e) {
       this.$router.push({ path: '/orderDetail', query: { order_id: e }})
     },
-    getOrderList() {
+    getOrderList(e) {
       this.dataListLoading = true
       const params = {
         page: this.pageIndex,
-        size: this.pageSize
+        size: this.pageSize,
+        payStatus:e
       }
       getOrderListByAdmin(params).then(res => {
         console.log(res)
         if (res.code === 200) {
           this.dataList = res.data.list
           this.totalPage = res.data.total
-        } else {
-          this.dataList = []
-          this.totalPage = 0
-        }
-        this.dataListLoading = false
-      })
-    },
-    // 获取数据列表
-    getDataList() {
-      this.dataListLoading = true
-      this.$http({
-        url: this.$http.adornUrl('/sys/user/list'),
-        method: 'get',
-        params: this.$http.adornParams({
-          'page': this.pageIndex,
-          'limit': this.pageSize,
-          'username': this.dataForm.userName
-        })
-      }).then(({ data }) => {
-        if (data && data.code === 0) {
-          this.dataList = data.page.list
-          this.totalPage = data.page.totalCount
         } else {
           this.dataList = []
           this.totalPage = 0
@@ -243,6 +292,21 @@ export default {
     currentChangeHandle(val) {
       this.pageIndex = val
       this.getOrderList()
+    },
+    handleClick(tab, event) {
+      console.log(tab, event)
+      console.log(tab.name)
+      this.getOrderList(tab.name)
+    },
+    sourceName(row, column, cellValue, index) {
+      console.log(row)
+      if (row.quote_source === '1') {
+        return '太保'
+      } else if (row.quote_source === '2') {
+        return '人保'
+      } else if (row.quote_source === '4') {
+        return '平安'
+      }
     },
     // 多选
     selectionChangeHandle(val) {

@@ -272,6 +272,8 @@ export default {
     toQuery() {
       this.dataListLoading = true
       const params = {
+        page: this.pageIndex,
+        size: this.pageSize,
         adminName: this.adminName
       }
       getAdminList(params).then(res => {

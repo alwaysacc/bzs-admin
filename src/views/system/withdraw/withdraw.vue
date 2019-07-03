@@ -7,7 +7,7 @@
             <el-input v-model="dataForm.userName" placeholder="用户名" clearable />
           </el-form-item>
           <el-form-item>
-            <el-button @click="getDataList()">查询</el-button>
+            <el-button @click="toQuery()">查询</el-button>
             <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量审核</el-button>
           </el-form-item>
         </el-form>
@@ -233,6 +233,25 @@ export default {
     this.getListByAdmin()
   },
   methods: {
+    toQuery() {
+      this.dataListLoading = true
+      const params = {
+        page: this.pageIndex,
+        size: this.pageSize,
+        userName: this.dataForm.userName
+      }
+      getListByAdmin(params).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          this.dataList = res.data.list
+          this.totalPage = res.data.total
+        } else {
+          this.dataList = []
+          this.totalPage = 0
+        }
+        this.dataListLoading = false
+      })
+    },
     getListByAdmin() {
       this.dataListLoading = true
       const params = {
@@ -356,14 +375,14 @@ export default {
   }
 }
 </script>
-<style>
-  .el-row {
+<style scoped>
+  .row-bg {
     margin-bottom: 20px;
   &:last-child {
      margin-bottom: 0;
    }
   }
-  .el-col {
+  .row-bg .el-col {
     border-radius: 4px;
   }
 </style>

@@ -127,20 +127,20 @@
             </template>
           </el-table-column>
           <el-table-column
-            prop="status"
+            prop="percentage"
             header-align="center"
             align="center"
             label="进度"
           >
             <template slot-scope="scope">
-              <el-progress :percentage="scope.row.percentage" :color="customColors"/>
+              <el-progress :percentage="scope.row.progress" :color="customColors"/>
+              <!--              {{ scope.row.percentage }}-->
             </template>
           </el-table-column>
           <el-table-column
             prop="total"
             header-align="center"
             align="center"
-            width="180"
             label="总数"
           />
           <el-table-column
@@ -222,23 +222,29 @@ export default {
         setTimeout(() => {
           this.getProgress() // 调用接口的方法
         }, 0)
-      }, 2000)
+      }, 10000)
     },
     getProgress() {
+      // this.getCrawlingList()
       for (let i = 0; i < this.dataList.length; i++) {
-        console.log(this.dataList[i])
+        // this.dataList[i].percentage =30
+        // console.log(this.dataList[i])
         if (this.dataList[i].status === '3') {
+          // this.getCrawlingList()
           const params = {
             seriesNo: this.dataList[i].seriesNo
           }
-          console.log(1111)
           getProgress(params).then(res => {
+            this.dataList[i].progress = Number((Number(res.data) / Number(this.dataList[i].total) * 100).toFixed(0))
+            // this.dataList[i].percentage=20
+            if (this.dataList[i].progress === 100) {
+              this.getCrawlingList()
+            }
+            console.log(this.dataList[i])
             console.log(res)
-            this.dataList[i].percentage = res.data / this.dataList[i].total * 100
           })
         }
       }
-      console.log('getProgress')
     },
     submitUpload() {
       this.$refs['dataForm'].validate((valid) => {
@@ -290,8 +296,10 @@ export default {
         size: this.pageSize
       }
       getCrawlingList(params).then(res => {
-        console.log(res)
         if (res.code === 200) {
+          for (let i = 0; i < res.data.list.length; i++) {
+            res.data.list[i].progress = (Number(res.data.list[i].finishTotal) / Number(res.data.list[i].total) * 100).toFixed(0)
+          }
           this.dataList = res.data.list
           this.totalPage = res.data.total
         } else {
@@ -303,7 +311,6 @@ export default {
     },
     downLoad(e) {
       window.location.href = process.env.BASE_API + 'crawling/carinfo/exportCrawlingDataList?seriesNo=' + e
-      console.log(process.env.BASE_API)
       /* const param = {
         seriesNo: e
       }
@@ -344,7 +351,6 @@ export default {
       })
     },
     beforeAvatarUpload(file, fileList) {
-      console.log(111111111111)
       this.url = process.env.BASE_API + 'crawling/carinfo/import'
       if (fileList.length != 0) {
         this.uploadStat = true

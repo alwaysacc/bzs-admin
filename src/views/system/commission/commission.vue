@@ -37,6 +37,18 @@
             </template>
           </el-table-column>
           <el-table-column
+            prop="insuranceBizPercentage"
+            header-align="center"
+            align="center"
+            label="保司商业佣金"
+          />
+          <el-table-column
+            prop="insuranceForcePercentage"
+            header-align="center"
+            align="center"
+            label="保司交强佣金"
+          />
+          <el-table-column
             prop="bizPercentage"
             header-align="center"
             align="center"
