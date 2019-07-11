@@ -8,11 +8,9 @@
       <div style="display: inline-block;margin: 0px 2px;">
         <el-button
           class="filter-item"
-          size="mini"
           type="primary"
           icon="el-icon-plus"
           @click="addRole">新增</el-button>
-        <eForm ref="form" :is-add="true"/>
       </div>
       <el-dialog :visible.sync="dialog" :title="isAdd ? '新增角色' : '编辑角色'" top="0" append-to-body width="500px" style="height: 100%" height="100%">
         <el-form ref="form" :model="form" :rules="rules" size="small" label-width="80px">
@@ -31,7 +29,8 @@
               :default-checked-keys="checkedArray"
               show-checkbox
               node-key="id"
-              highlight-current/>
+              highlight-current
+              @check-change="handleCheckChange"/>
           </el-form-item>
         </el-form>
         <div slot="footer" class="dialog-footer">
@@ -185,6 +184,12 @@ export default {
   activated() {
   },
   methods: {
+    handleCheckChange(data, checked, indeterminate) {
+      /*      let a=this.$refs.tree.getCheckedKeys().concat( this.$refs.tree.getHalfCheckedKeys())
+      console.log( this.$refs.tree.getCheckedKeys());
+      console.log( this.$refs.tree.getHalfCheckedKeys());
+      console.log(a);*/
+    },
     getRoleList() {
       this.dataListLoading = true
       const params = {
@@ -232,7 +237,8 @@ export default {
           this.dialog = true
         })
       } else {
-        this.add = true
+        console.log(1111)
+        this.isAdd = true
         this.form = {}
         this.checkedArray = []
         this.getMenus()
@@ -259,36 +265,35 @@ export default {
     doSubmit() {
       this.$refs['form'].validate((valid) => {
         if (valid) {
-          console.log(this.$refs.tree.getCheckedKeys().length)
-          if (this.$refs.tree.getCheckedKeys().length!=0) {
+          if (this.$refs.tree.getCheckedKeys().length != 0) {
             if (this.isAdd) {
               this.dialog = false
               const param = this.form
-              param.menuId = JSON.stringify(this.$refs.tree.getCheckedKeys())
+              param.menuId = JSON.stringify(this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys()))
               addRoleAndMenu(param).then(res => {
                 console.log(res)
                 this.$notify({
                   title: '保存成功',
                   type: 'success'
                 })
+                this.getRoleList()
               })
-              this.getRoleList()
             } else {
               delete this.form.createTime
               const param = this.form
-              param.menuId = JSON.stringify(this.$refs.tree.getCheckedKeys())
+              param.menuId = JSON.stringify(this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys()))
               param.beforeMenuId = JSON.stringify(this.checkedArray)
+              this.dialog = false
               updateRole(param).then(res => {
                 console.log(res)
                 this.$notify({
                   title: '操作成功',
                   type: 'success'
                 })
+                this.getRoleList()
               })
-              this.dialog = false
-              this.getRoleList()
             }
-          }else{
+          } else {
             this.$notify({
               title: '请选择权限',
               type: 'warning'
