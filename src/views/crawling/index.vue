@@ -221,6 +221,8 @@ export default {
   created() {
     this.getCrawlingList()
     this.initList()
+    const user = JSON.parse(this.$store.getters.user)
+    console.log(user)
   },
   destroyed() {
     clearInterval(this.myInterval)
