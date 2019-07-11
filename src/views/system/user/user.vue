@@ -70,6 +70,7 @@
           border
           size="mini"
           style="width: 100%;"
+          @selection-change="selectionChangeHandle"
         >
           <el-table-column
             type="selection"

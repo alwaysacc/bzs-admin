@@ -12,6 +12,23 @@
           <svg-icon slot="prefix" icon-class="password" class="el-input__icon" style="height: 39px;width: 13px;margin-left: 2px;" />
         </el-input>
       </el-form-item>
+      <el-form-item prop="code" :error="errorMsg">
+        <div style="display: flex; align-items: left">
+          <el-input v-model="loginForm.code" style="width: 60%" placeholder="验证码" @keyup.enter.native="handleLogin">
+            <svg-icon slot="prefix" icon-class="zujian" class="el-input__icon" style="height: 39px;width: 13px;margin-left: 2px;" />
+          </el-input>
+          <ImgVerify ref="imgVerify" style="margin-left: 20px" @imgCode="imgCode"/>
+        </div>
+      </el-form-item>
+      <!--      <el-form-item :error="errorMsg" prop="code">
+        <input v-model="picLyanzhengma" type="text" placeholder="请输入验证码" class="yanzhengma_input" @blur="checkLpicma">
+        <input id="code" v-model="checkCode" type="button" class="verification1" @click="createCode"> <br>
+        <ImgVerify @imgCode="imgCode" ref="imgVerify"/>
+      </el-form-item>
+      <el-form-item :error="errorMsg" prop="code">
+        <Verify :type="3" :show-button="false" :bar-size="size" v-model="loginForm.code" @success="loginForm.code=true" @error="alert('error')"/>
+      </el-form-item>-->
+
       <el-checkbox v-model="loginForm.rememberMe" style="margin:0px 0px 25px 0px;">记住密码</el-checkbox>
       <el-form-item style="width:100%;">
         <el-button :loading="loading" size="medium" type="primary" style="width:100%;" @click.native.prevent="handleLogin">
@@ -22,25 +39,39 @@
     </el-form>
   </div>
 </template>
-
+<!--http://localhost:8082/account/info/gifCode-->
 <script>
+import Verify from 'vue2-verify'
 import Config from '@/config'
 import Cookies from 'js-cookie'
+import ImgVerify from '../components/verify'
 export default {
   name: 'Login',
+  components: {
+    Verify,
+    ImgVerify
+  },
   data() {
     return {
       loginForm: {
         username: 'admin',
         password: '123456',
-        rememberMe: false
+        rememberMe: false,
+        code: ''
+      },
+      size: {
+        width: '315px',
+        height: '38px'
       },
       loginRules: {
         username: [{ required: true, trigger: 'blur', message: '用户名不能为空' }],
-        password: [{ required: true, trigger: 'blur', message: '密码不能为空' }]
+        password: [{ required: true, trigger: 'blur', message: '密码不能为空' }],
+        code: [{ required: true, trigger: 'blur', message: '验证码不能为空' }]
       },
       loading: false,
-      redirect: undefined
+      redirect: undefined,
+      errorMsg: '',
+      checkCode: ''
     }
   },
   watch: {
@@ -55,6 +86,13 @@ export default {
     this.getCookie()
   },
   methods: {
+    imgCode(code) {
+      console.log(code)
+      this.checkCode = code
+    },
+    handleClick() {
+      this.$refs.imgVerify.draw()
+    },
     getCookie() {
       const username = Cookies.get('username')
       let password = Cookies.get('password')
@@ -67,29 +105,34 @@ export default {
       }
     },
     handleLogin() {
+      console.log(this.$refs.loginForm)
       this.$refs.loginForm.validate(valid => {
         const user = this.loginForm
         if (valid) {
-          this.loading = true
-          if (user.rememberMe) {
-            Cookies.set('username', user.username, { expires: Config.passCookieExpires })
-            Cookies.set('password', user.password, { expires: Config.passCookieExpires })
-            Cookies.set('rememberMe', user.rememberMe, { expires: Config.passCookieExpires })
+          console.log(this.loginForm.code.toUpperCase())
+          console.log(this.checkCode)
+          console.log(this.checkCode === this.loginForm.code.toUpperCase())
+          if (this.checkCode === this.loginForm.code.toUpperCase()) {
+            this.loading = true
+            if (user.rememberMe) {
+              Cookies.set('username', user.username, { expires: Config.passCookieExpires })
+              Cookies.set('password', user.password, { expires: Config.passCookieExpires })
+              Cookies.set('rememberMe', user.rememberMe, { expires: Config.passCookieExpires })
+            } else {
+              Cookies.remove('username')
+              Cookies.remove('password')
+              Cookies.remove('rememberMe')
+            }
+            this.$store.dispatch('Login', user).then((res) => {
+              this.loading = false
+              this.$router.push({ path: this.redirect || '/' })
+            }).catch(() => {
+              this.loading = false
+            })
           } else {
-            Cookies.remove('username')
-            Cookies.remove('password')
-            Cookies.remove('rememberMe')
+            this.errorMsg = '验证码不正确'
+            return false
           }
-          this.$store.dispatch('Login', user).then((res) => {
-            this.loading = false
-            this.$router.push({ path: this.redirect || '/' })
-          }).catch(() => {
-
-            this.loading = false
-          })
-        } else {
-          console.log('error submit!!')
-          return false
         }
       })
     }

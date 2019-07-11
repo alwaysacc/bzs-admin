@@ -129,15 +129,7 @@
             </template>
           </el-table-column>
         </el-table>
-        <el-pagination
-          :current-page="pageIndex"
-          :page-sizes="[10, 20, 50, 100]"
-          :page-size="pageSize"
-          :total="totalPage"
-          layout="total, sizes, prev, pager, next, jumper"
-          @size-change="sizeChangeHandle"
-          @current-change="currentChangeHandle"
-        />
+
       </el-col>
     </el-row>
   </div>

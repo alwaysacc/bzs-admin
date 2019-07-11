@@ -142,11 +142,11 @@
             fixed="right"
             header-align="center"
             align="center"
-            width="150"
-            label="操作"
-          >
-            <template slot-scope="scope">
-              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdate(scope.row)"/>
+              width="150"
+              label="操作"
+              >
+              <template slot-scope="scope">
+                <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdate(scope.row)"/>
               <el-popover
                 :ref="scope.row.id"
                 placement="top"
@@ -189,7 +189,7 @@ export default {
       }
       const c = callback
       checkAdminLoginName(param).then(res => {
-        if (res) {
+        if (res.data) {
           c(new Error('账号已存在'))
         } else {
           c()

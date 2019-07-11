@@ -8,7 +8,7 @@
           </el-form-item>
           <el-form-item>
             <el-button @click="toQuery()">查询</el-button>
-            <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量审核</el-button>
+            <!--<el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量审核</el-button>-->
           </el-form-item>
         </el-form>
         <el-table
@@ -18,12 +18,12 @@
           style="width: 100%;"
           @selection-change="selectionChangeHandle"
         >
-          <el-table-column
-            type="selection"
-            header-align="center"
-            align="center"
-            width="50"
-          />
+          <!--<el-table-column-->
+          <!--type="selection"-->
+          <!--header-align="center"-->
+          <!--align="center"-->
+          <!--width="50"-->
+          <!--/>-->
           <el-table-column
             type="index"
             width="50"

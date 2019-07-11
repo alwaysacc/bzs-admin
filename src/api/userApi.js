@@ -76,12 +76,16 @@ export const getVeriftcationDetail = (params) => {
 export const commissionList = (params) => {
   return http.fetchPost('/commission/percentage/list', params)
 }
+export const getCommissionListByDay = (params) => {
+  return http.fetchPost('/commission/every/day/list', params)
+}
 export const updateCommission = (params) => {
   return http.fetchPost('/commission/percentage/update', params)
 }
 export const getDrawCashList = (params) => {
   return http.fetchPost('/draw/cash/getDrawCashList', params)
 }
+
 // 菜单
 export const getMenuByAdminName = (params) => {
   return http.fetchPost('/admin/menu/getMenuByAdminName', params)
@@ -103,6 +107,9 @@ export const quoteDetails = (params) => {
 // 爬虫
 export const getCrawlingList = (params) => {
   return http.fetchPost('/crawling/excelinfo/list', params)
+}
+export const deleteCrawling = (params) => {
+  return http.fetchPost('/crawling/excelinfo/delete', params)
 }
 export const startCrawling = (params) => {
   return http.fetchPost('/crawling/carinfo/startCrawling', params)

@@ -12,102 +12,202 @@
         <el-button type="danger" :disabled="dataListSelections.length <= 0" @click="deleteHandle()">批量删除</el-button>
       </el-form-item>
     </el-form>-->
-        <el-table
-          v-loading="dataListLoading"
-          :data="dataList"
-          border
-          style="width: 100%;"
-          @selection-change="selectionChangeHandle"
-        >
-          <el-table-column
-            type="index"
-            width="50"
-            label="ID"
-          />
-          <el-table-column
-            prop="source"
-            header-align="center"
-            align="center"
-            label="保险公司"
-          >
-            <template slot-scope="scope">
-              <el-tag v-if="scope.row.source==1" size="small">太平洋</el-tag>
-              <el-tag v-if="scope.row.source==2" size="small">平安</el-tag>
-              <el-tag v-if="scope.row.source==4" size="small">人保</el-tag>
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="insuranceBizPercentage"
-            header-align="center"
-            align="center"
-            label="保司商业佣金"
-          />
-          <el-table-column
-            prop="insuranceForcePercentage"
-            header-align="center"
-            align="center"
-            label="保司交强佣金"
-          />
-          <el-table-column
-            prop="bizPercentage"
-            header-align="center"
-            align="center"
-            label="商业险佣金"
-          />
-          <el-table-column
-            prop="subsidy"
-            header-align="center"
-            align="center"
-            label="商业险补贴"
-          />
-          <el-table-column
-            prop="forcePercentage"
-            header-align="center"
-            align="center"
-            label="交强险佣金"
-          />
-          <el-table-column
-            prop="levelOne"
-            header-align="center"
-            align="center"
-            label="一级提成"
-          />
-          <el-table-column
-            prop="levelTwo"
-            header-align="center"
-            align="center"
-            label="二级提成"
-          />
-          <el-table-column
-            prop="updateTime"
-            header-align="center"
-            align="center"
-            width="180"
-            label="修改时间"
-          >
-            <template slot-scope="scope">
-              {{ util.formatTime(scope.row.updateTime) }}
-            </template>
-          </el-table-column>
-          <el-table-column
-            prop="name"
-            header-align="center"
-            align="center"
-            width="180"
-            label="修改人"
-          />
-          <el-table-column
-            fixed="right"
-            header-align="center"
-            align="center"
-            width="150"
-            label="操作"
-          >
-            <template slot-scope="scope">
-              <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdateHandle(scope.row)"/>
-            </template>
-          </el-table-column>
-        </el-table>
+        <el-tabs v-model="activeName" @tab-click="handleClick">
+          <el-tab-pane label="佣金设置" name="1">
+            <el-table
+              v-loading="dataListLoading"
+              :data="dataList"
+              border
+              style="width: 100%;"
+              @selection-change="selectionChangeHandle"
+            >
+              <el-table-column
+                type="index"
+                width="50"
+                label="ID"
+              />
+              <el-table-column
+                prop="source"
+                header-align="center"
+                align="center"
+                label="保险公司"
+              >
+                <template slot-scope="scope">
+                  <el-tag v-if="scope.row.source==1" size="small">太平洋</el-tag>
+                  <el-tag v-if="scope.row.source==2" size="small">平安</el-tag>
+                  <el-tag v-if="scope.row.source==4" size="small">人保</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="insuranceBizPercentage"
+                header-align="center"
+                align="center"
+                label="保司商业佣金"
+              />
+              <el-table-column
+                prop="insuranceForcePercentage"
+                header-align="center"
+                align="center"
+                label="保司交强佣金"
+              />
+              <el-table-column
+                prop="bizPercentage"
+                header-align="center"
+                align="center"
+                label="商业险佣金"
+              />
+              <el-table-column
+                prop="subsidy"
+                header-align="center"
+                align="center"
+                label="商业险补贴"
+              />
+              <el-table-column
+                prop="forcePercentage"
+                header-align="center"
+                align="center"
+                label="交强险佣金"
+              />
+              <el-table-column
+                prop="levelOne"
+                header-align="center"
+                align="center"
+                label="一级提成"
+              />
+              <el-table-column
+                prop="levelTwo"
+                header-align="center"
+                align="center"
+                label="二级提成"
+              />
+              <el-table-column
+                prop="updateTime"
+                header-align="center"
+                align="center"
+                width="180"
+                label="修改时间"
+              >
+                <template slot-scope="scope">
+                  {{ util.formatTime(scope.row.updateTime) }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="name"
+                header-align="center"
+                align="center"
+                width="180"
+                label="修改人"
+              />
+              <el-table-column
+                fixed="right"
+                header-align="center"
+                align="center"
+                width="150"
+                label="操作"
+              >
+                <template slot-scope="scope">
+                  <el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdateHandle(scope.row)"/>
+                </template>
+              </el-table-column>
+            </el-table>
+          </el-tab-pane>
+          <el-tab-pane label="历史佣金" name="2">
+            <el-table
+              v-loading="dataListLoading"
+              :data="comList"
+              border
+              style="width: 100%;"
+              @selection-change="selectionChangeHandle"
+            >
+              <el-table-column
+                prop="createTime"
+                header-align="center"
+                align="center"
+                width="180"
+                label="日期"
+              >
+                <template slot-scope="scope">
+                  {{ util.formatDate(scope.row.createTime) }}
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="source"
+                header-align="center"
+                align="center"
+                label="保险公司"
+              >
+                <template slot-scope="scope">
+                  <el-tag v-if="scope.row.source==1" size="small">太平洋</el-tag>
+                  <el-tag v-if="scope.row.source==2" size="small">平安</el-tag>
+                  <el-tag v-if="scope.row.source==4" size="small">人保</el-tag>
+                </template>
+              </el-table-column>
+              <el-table-column
+                prop="insuranceBizPercentage"
+                header-align="center"
+                align="center"
+                label="保司商业佣金"
+              />
+              <el-table-column
+                prop="insuranceForcePercentage"
+                header-align="center"
+                align="center"
+                label="保司交强佣金"
+              />
+              <el-table-column
+                prop="bizPercentage"
+                header-align="center"
+                align="center"
+                label="商业险佣金"
+              />
+              <el-table-column
+                prop="subsidy"
+                header-align="center"
+                align="center"
+                label="商业险补贴"
+              />
+              <el-table-column
+                prop="forcePercentage"
+                header-align="center"
+                align="center"
+                label="交强险佣金"
+              />
+              <el-table-column
+                prop="levelOne"
+                header-align="center"
+                align="center"
+                label="一级提成"
+              />
+              <el-table-column
+                prop="levelTwo"
+                header-align="center"
+                align="center"
+                label="二级提成"
+              />
+
+              <!--<el-table-column-->
+              <!--fixed="right"-->
+              <!--header-align="center"-->
+              <!--align="center"-->
+              <!--width="150"-->
+              <!--label="操作"-->
+              <!--&gt;-->
+              <!--<template slot-scope="scope">-->
+              <!--<el-button type="primary" size="small" icon="el-icon-edit" @click="addOrUpdateHandle(scope.row)"/>-->
+              <!--</template>-->
+              <!--</el-table-column>-->
+            </el-table>
+            <el-pagination
+              :current-page="pageIndex"
+              :page-sizes="[10, 20, 50, 100]"
+              :page-size="pageSize"
+              :total="totalPage"
+              layout="total, sizes, prev, pager, next, jumper"
+              @size-change="sizeChangeHandle"
+              @current-change="currentChangeHandle"
+            />
+          </el-tab-pane>
+        </el-tabs>
         <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshList="getCommissionList" />
       </el-col>
     </el-row>
@@ -115,7 +215,7 @@
 </template>
 
 <script>
-import { commissionList, deleteUser } from '../../../api/userApi'
+import { commissionList, deleteUser, getCommissionListByDay } from '../../../api/userApi'
 import addOrUpdate from './add-or-update'
 export default {
   components: {
@@ -123,6 +223,7 @@ export default {
   },
   data() {
     return {
+      activeName: '1',
       dataForm: {
         userName: ''
       },
@@ -132,7 +233,8 @@ export default {
       totalPage: 0,
       dataListLoading: false,
       dataListSelections: [],
-      addOrUpdateVisible: false
+      addOrUpdateVisible: false,
+      comList: ''
     }
   },
   activated() {
@@ -142,13 +244,30 @@ export default {
     this.getCommissionList()
   },
   methods: {
+    getCommissionListByDay() {
+      const params = {
+        page: this.pageIndex,
+        size: this.pageSize
+      }
+      getCommissionListByDay(params).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          this.comList = res.data.list
+          this.totalPage = res.data.total
+        } else {
+          this.comList = []
+          this.totalPage = 0
+        }
+        this.dataListLoading = false
+      })
+    },
     getCommissionList() {
       this.dataListLoading = true
       const params = {
       }
       commissionList(params).then(res => {
         console.log(res)
-        if (res.code == 200) {
+        if (res.code === 200) {
           this.dataList = res.data.list
           this.totalPage = res.data.total
         } else {
@@ -157,6 +276,14 @@ export default {
         }
         this.dataListLoading = false
       })
+    },
+    handleClick(e) {
+      if (e.name === '2') {
+        console.log(e.name)
+        this.getCommissionListByDay()
+      } else {
+        this.getCommissionList()
+      }
     },
     // 每页数
     sizeChangeHandle(val) {

@@ -7,6 +7,9 @@
         <div style="display: inline-block;margin: 0px 2px;">
           <el-button class="filter-item" size="mini" type="primary" @click="dialog = true">点击上传</el-button>
         </div>
+        <div style="display: inline-block;margin: 0px 2px;">
+          <el-button :disabled="dataListSelections.length <= 0" class="filter-item" type="danger" @click="deleteHandle()">批量删除</el-button>
+        </div>
       </div>
       <!-- 搜索 -->
 
@@ -75,6 +78,12 @@
           style="width: 100%;"
           @selection-change="selectionChangeHandle"
         >
+          <el-table-column
+            type="selection"
+            header-align="center"
+            align="center"
+            width="50"
+          />
           <el-table-column
             prop="id"
             width="50"
@@ -172,7 +181,7 @@
 </template>
 
 <script>
-import { getCrawlingList, startCrawling, getProgress } from '../../api/userApi'
+import { getCrawlingList, startCrawling, getProgress, deleteCrawling } from '../../api/userApi'
 export default {
   components: {
   },
@@ -235,13 +244,13 @@ export default {
             seriesNo: this.dataList[i].seriesNo
           }
           getProgress(params).then(res => {
-            this.dataList[i].progress = Number((Number(res.data) / Number(this.dataList[i].total) * 100).toFixed(0))
+            this.dataList[i].progress = Math.ceil((Number(res.data) / Number(this.dataList[i].total) * 100))
             // this.dataList[i].percentage=20
             if (this.dataList[i].progress === 100) {
               this.getCrawlingList()
             }
-            console.log(this.dataList[i])
-            console.log(res)
+            // console.log(this.dataList[i].progress)
+            // console.log(res.data)
           })
         }
       }
@@ -298,7 +307,8 @@ export default {
       getCrawlingList(params).then(res => {
         if (res.code === 200) {
           for (let i = 0; i < res.data.list.length; i++) {
-            res.data.list[i].progress = (Number(res.data.list[i].finishTotal) / Number(res.data.list[i].total) * 100).toFixed(0)
+            res.data.list[i].progress = Math.ceil((Number(res.data.list[i].finishTotal) / Number(res.data.list[i].total) * 100))
+            // res.data.list[i].progress = (Number(res.data.list[i].finishTotal) / Number(res.data.list[i].total) * 100).toFixed(0)
           }
           this.dataList = res.data.list
           this.totalPage = res.data.total
@@ -384,7 +394,35 @@ export default {
     },
     // 多选
     selectionChangeHandle(val) {
+      console.log(val)
       this.dataListSelections = val
+    },
+    deleteHandle(id) {
+      var userIds = id ? [id] : this.dataListSelections.map(item => {
+        return item.id
+      })
+      console.log(userIds)
+      this.dialogVisible = true
+      console.log(id)
+      this.$confirm(`确认删除?`, '提示', {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'warning'
+      }).then(() => {
+        const param = {
+          id: userIds.join(',')
+        }
+        deleteCrawling(param).then(res => {
+          console.log(res)
+          if (res.code === 200) {
+            this.$notify({
+              title: '操作成功',
+              type: 'success'
+            })
+            this.getCrawlingList()
+          }
+        })
+      })
     }
   }
 }
