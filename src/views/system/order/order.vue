@@ -230,7 +230,7 @@ export default {
     this.getOrderList()
   },
   created() {
-    this.getOrderList(9)
+    this.getOrderList(this.activeName)
   },
   methods: {
     toQuery() {
@@ -294,8 +294,6 @@ export default {
       this.getOrderList()
     },
     handleClick(tab, event) {
-      console.log(tab, event)
-      console.log(tab.name)
       this.getOrderList(tab.name)
     },
     sourceName(row, column, cellValue, index) {

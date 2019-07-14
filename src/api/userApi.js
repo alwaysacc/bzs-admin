@@ -22,6 +22,11 @@ export const checkUserLoginName = (params) => {
 export const getUserNameList = (params) => {
   return http.fetchPost('/account/info/getUserNameList', params)
 }
+// 实名认证审核列表
+export const getWaitCheckList = (params) => {
+  return http.fetchPost('/idCardImg/getWaitCheckList', params)
+}
+
 // 管理员
 export const adminLogin = (params) => {
   return http.fetchPost('/admin/login', params)
