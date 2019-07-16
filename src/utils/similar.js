@@ -59,8 +59,18 @@ export function formatTime(value) {
   s = s < 10 ? ('0' + s) : s
   return y + '-' + MM + '-' + d + ' ' + h + ':' + m + ':' + s
 }
+export function RandomNumBoth() {
+  var Range = 99999 - 1
+
+  var Rand = Math.random()
+
+  var num = 1 + Math.floor(Rand * Range) // 舍去
+
+  return '?' + num
+}
 export default {
   similar,
   formatDate,
-  formatTime
+  formatTime,
+  RandomNumBoth
 }

@@ -26,6 +26,14 @@ export const getUserNameList = (params) => {
 export const getWaitCheckList = (params) => {
   return http.fetchPost('/idCardImg/getWaitCheckList', params)
 }
+// 实名认证驳回
+export const updateAccountVerifiedStat = (params) => {
+  return http.fetchPost('/account/info/updateAccountVerifiedStat', params)
+}
+// 验证实名认证
+export const checkAccountVerified = (params) => {
+  return http.fetchPost('/account/info/checkAccountVerified', params)
+}
 
 // 管理员
 export const adminLogin = (params) => {

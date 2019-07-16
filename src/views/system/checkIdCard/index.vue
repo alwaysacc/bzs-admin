@@ -2,15 +2,15 @@
   <div class="app-container">
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
+        <!--<el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
           <el-form-item>
             <el-input v-model="dataForm.userName" placeholder="用户名" clearable/>
           </el-form-item>
           <el-form-item>
             <el-button @click="toQuery()">查询</el-button>
-            <!--<el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量审核</el-button>-->
+            &lt;!&ndash;<el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量审核</el-button>&ndash;&gt;
           </el-form-item>
-        </el-form>
+        </el-form>-->
         <el-tabs v-model="activeName" @tab-click="handleClick">
           <el-tab-pane label="全部" name="9"/>
           <el-tab-pane label="待审核" name="1"/>
@@ -84,21 +84,23 @@
             prop="createdTime"
             header-align="center"
             align="center"
+            min-width="120"
             label="状态"
           >
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.verified_stat == 1" size="small" type="danger">待审核</el-tag>
-              <el-tag v-else size="small">审核通过</el-tag>
+              <el-tag v-if="scope.row.verified_stat == 1" size="small" type="success">待审核</el-tag>
+              <el-tag v-if="scope.row.verified_stat == 2" size="small" type="danger">驳回</el-tag>
+              <el-tag v-if="scope.row.verified_stat == 3" size="small">审核通过</el-tag>
             </template>
           </el-table-column>
-          <el-table-column
+          <!--          <el-table-column
             prop="verification_by"
             header-align="center"
             align="center"
             label="操作人"
-          />
+          />-->
           <el-table-column
-            prop="createdTime"
+            prop="msg"
             header-align="center"
             align="center"
             width="180"
@@ -113,7 +115,9 @@
           >
             <template slot-scope="scope">
               <!--<el-button :disabled="scope.row.status != '1'" type="primary" size="small" @click="pay(scope.row.id)"> 审核-->
-              <el-button  type="primary" size="small" @click="pay(scope.row.id)"> 审核
+              <el-button :disabled="scope.row.verified_stat != 1" type="primary" size="small" @click="check(scope.row)"> 驳回
+              </el-button>
+              <el-button :disabled="scope.row.verified_stat != 1" type="primary" size="small" @click="checkAccountVerified(scope.row)"> 验证
               </el-button>
             </template>
           </el-table-column>
@@ -131,55 +135,19 @@
     </el-row>
     <el-dialog
       :visible.sync="dialogVisible"
-      :before-close="handleClose"
       append-to-body
       title="提示"
       width="500px"
     >
       <el-row type="flex" justify="center" class="row-bg">
-        <el-col span="8">申请人：{{ map.user_name }}
-        </el-col>
-        <el-col span="8">
-          当前余额：{{ map.balance_total+Number(map.money ) }}元
-        </el-col>
-      </el-row>
-      <el-row type="flex" justify="center" class="row-bg">
-        <el-col span="8">
-          申请金额：{{ map.money }}元
-        </el-col>
-        <el-col span="8">
-          提现后余额：{{ map.balance_total }}元
-        </el-col>
-      </el-row>
-      <el-row type="flex" justify="center" class="row-bg">
-        <el-col span="8">
-          提现方式：
-          <a v-if="map.type==0">支付宝</a>
-          <a v-if="map.type==1">微信</a>
-          <a v-if="map.type==2">银行卡</a>
-        </el-col>
-        <el-col span="8">
-          提现账户：{{ map.amount }}
-        </el-col>
-      </el-row>
-      <el-row type="flex" justify="center" class="row-bg">
-        <el-col span="8">
-          账号姓名：{{ map.name }}
-        </el-col>
-        <el-col span="8"/>
-      </el-row>
-      <el-row v-if="stat" type="flex" justify="center" class="row-bg">
-        <el-col span="16">
-          是否打款：&nbsp;
-          <el-radio v-model="map.isPay" label="1">是</el-radio>
-          <el-radio v-model="map.isPay" label="0">否</el-radio>
-        </el-col>
-      </el-row>
-      <el-row v-if="!stat" type="flex" justify="center" class="row-bg">
-        <el-col span="16">
-          选择审核状态：&nbsp;
-          <el-radio v-model="map.status" label="1">通过</el-radio>
-          <el-radio v-model="map.status" label="2">驳回</el-radio>
+        <el-col>驳回原因：
+          <el-select v-model="value" placeholder="请选择">
+            <el-option
+              v-for="item in options"
+              :key="item.value"
+              :label="item.label"
+              :value="item.value"/>
+          </el-select>
         </el-col>
       </el-row>
 
@@ -193,8 +161,8 @@
 </template>
 
 <script>
-import { getWaitCheckList } from '../../../api/userApi'
-
+import { getWaitCheckList, updateAccountVerifiedStat, checkAccountVerified } from '../../../api/userApi'
+import util from '../../../utils/similar'
 export default {
   components: {},
   data() {
@@ -214,13 +182,55 @@ export default {
       id: '',
       map: '',
       stat: false,
-      activeName: '9'
+      activeName: '9',
+      options: [{
+        value: '0',
+        label: '身份证照片不清晰'
+      }, {
+        value: '1',
+        label: '上传的不是身份证照片'
+      }, {
+        value: '2',
+        label: '其它'
+      }],
+      value: ''
     }
   },
   created() {
+    console.log(util.RandomNumBoth())
     this.getWaitCheckList(this.activeName)
   },
   methods: {
+    checkAccountVerified(e) {
+      const params = {
+        id: e.id,
+        backPath: e.back_path,
+        frontPath: e.front_path,
+        accountId: e.account_id,
+        mobile: e.mobile
+      }
+      checkAccountVerified(params).then(res => {
+        this.dialogVisible = false
+        console.log(res)
+        if (res.code === 200) {
+          this.$notify({
+            title: res.data,
+            type: 'success'
+          })
+        } else {
+          this.$notify({
+            title: res.data,
+            type: 'fail'
+          })
+        }
+        this.getWaitCheckList(this.activeName)
+      })
+    },
+    check(e) {
+      this.dialogVisible = true
+      this.map = e
+      console.log(e)
+    },
     getWaitCheckList(e) {
       this.dataListLoading = true
       const params = {
@@ -229,8 +239,11 @@ export default {
         verifiedStat: e
       }
       getWaitCheckList(params).then(res => {
-        console.log(res)
         if (res.code == 200) {
+          for (let i = 0; i < res.data.list.length; i++) {
+            res.data.list[i].front_path = res.data.list[i].front_path + util.RandomNumBoth()
+            res.data.list[i].back_path = res.data.list[i].back_path + util.RandomNumBoth()
+          }
           this.dataList = res.data.list
           this.totalPage = res.data.total
         } else {
@@ -255,84 +268,26 @@ export default {
     selectionChangeHandle(val) {
       this.dataListSelections = val
     },
-    pay(e) {
-      this.stat = true
-      const params = {
-        id: e
-      }
-      getVeriftcationDetail(params).then(res => {
-        console.log(res)
-        if (res.code === 200) {
-          this.map = res.data
-        }
-      })
-      this.id = e
-      this.dialogVisible = true
-    },
-    addOrUpdateHandle(e) {
-      const params = {
-        id: e
-      }
-      getVeriftcationDetail(params).then(res => {
-        console.log(res)
-        if (res.code === 200) {
-          this.map = res.data
-        }
-      })
-      this.id = e
-      this.dialogVisible = true
-    },
     updateStat() {
-      const user = JSON.parse(this.$store.getters.user)
-      /*      if (this.stat) {
-        this.dialogVisible = false
-        const params = {
-          id: this.id,
-          isPay: this.map.isPay,
-          userName: user.name
-        }
-        updateVerificationStatus(params).then(res => {
-          console.log(res)
-          if (res.code == 200) {
-            this.$notify({
-              title: '操作成功',
-              type: 'success'
-            })
-            this.getListByAdmin()
-          } else {
-            this.$message({
-              message: res.message
-            })
-            this.getListByAdmin()
-          }
-          this.dataListLoading = false
-        })
-      } else {*/
-      console.log(user)
-      this.dialogVisible = false
+      console.log(this.value)
+      console.log(this.options[this.value].label)
       const params = {
-        id: this.id,
-        isPay: this.map.isPay,
-        status: this.map.status,
-        userName: user.name
+        accountId: this.map.account_id,
+        verifiedStat: 2,
+        id: this.map.id,
+        msg: this.options[this.value].label
       }
-      updateVerificationStatus(params).then(res => {
+      updateAccountVerifiedStat(params).then(res => {
+        this.dialogVisible = false
         console.log(res)
-        if (res.code == 200) {
+        if (res.code === 200) {
           this.$notify({
             title: '操作成功',
             type: 'success'
           })
-          this.getListByAdmin()
-        } else {
-          this.$message({
-            message: res.message
-          })
-          this.getListByAdmin()
+          this.getWaitCheckList(this.activeName)
         }
-        this.dataListLoading = false
       })
-      // }
     },
     handleClick(tab, event) {
       this.getWaitCheckList(tab.name)
@@ -351,12 +306,10 @@ export default {
 <style scoped>
   .row-bg {
     margin-bottom: 20px;
-
   &
   :last-child {
     margin-bottom: 0;
   }
-
   }
   .row-bg .el-col {
     border-radius: 4px;

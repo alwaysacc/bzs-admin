@@ -27,10 +27,13 @@ export default {
         if (code === 200) {
           resolve(res.data)
           return Promise.reject('error')
-        } else {
+        } else if (code === 500) {
           Notification.error({
             title: '内部错误'
           })
+          return Promise.reject('error')
+        } else if (code === 400) {
+          resolve(res.data)
           return Promise.reject('error')
         }
       }).catch(error => {
