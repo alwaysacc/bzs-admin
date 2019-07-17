@@ -115,9 +115,11 @@
           >
             <template slot-scope="scope">
               <!--<el-button :disabled="scope.row.status != '1'" type="primary" size="small" @click="pay(scope.row.id)"> 审核-->
-              <el-button :disabled="scope.row.verified_stat != 1" type="primary" size="small" @click="check(scope.row)"> 驳回
+              <el-button :disabled="scope.row.verified_stat != 1" type="primary" size="small" @click="check(scope.row)">
+                {{ scope.row.verified_stat==2?'已驳回':'驳回' }}
               </el-button>
-              <el-button :disabled="scope.row.verified_stat != 1" type="primary" size="small" @click="checkAccountVerified(scope.row)"> 验证
+              <el-button :disabled="scope.row.verified_stat != 1" type="primary" size="small" @click="showDialog(scope.row)">
+                {{ scope.row.verified_stat==3?'已审核':'审核' }}
               </el-button>
             </template>
           </el-table-column>
@@ -157,6 +159,33 @@
       </span>
     </el-dialog>
 
+    <el-dialog
+      :visible.sync="dialogFormVisible"
+      append-to-body
+      title="提示"
+      top="0vh"
+      width="500px">
+      <el-form ref="form" :model="form" :rules="rules">
+        <el-row style="text-align: center">
+          <el-image
+            :src="map.front_path"
+            fit="cover"
+            style="width: 300px; height: 280px"/>
+        </el-row>
+
+        <el-form-item label-width="120px" label="姓名" prop="name">
+          <el-input v-model="form.name" autocomplete="off" placeholder="请输入姓名"/>
+        </el-form-item>
+        <el-form-item label-width="120px" label="身份证号" prop="idCard">
+          <el-input v-model="form.idCard" autocomplete="off" placeholder="请输入身份证号"/>
+        </el-form-item>
+
+      </el-form>
+      <div slot="footer" class="">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="checkAccountVerified">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -168,6 +197,22 @@ export default {
   data() {
     return {
       dialogVisible: false,
+      dialogFormVisible: false,
+      form: {
+        name: '',
+        idCard: ''
+      },
+      rules: {
+        idCard: [
+          { required: true, message: '请输入身份证号', trigger: 'blur' },
+          { pattern: /(^\d{15}$)|(^\d{18}$)|(^\d{17}(\d|X|x)$)/, message: '你的身份证格式不正确' }
+        ],
+        name:
+          [{ required: true, message: '请输入姓名', trigger: 'blur' },
+            { min: 2, max: 7, message: '长度在 2 到 7 个字符' },
+            { pattern: /^[\u4E00-\u9FA5]+$/, message: '姓名只能为中文' }
+          ]
+      },
       status: '',
       dataForm: {
         userName: ''
@@ -201,29 +246,40 @@ export default {
     this.getWaitCheckList(this.activeName)
   },
   methods: {
+    showDialog(e) {
+      this.map = e
+      this.dialogFormVisible = true
+    },
     checkAccountVerified(e) {
-      const params = {
-        id: e.id,
-        backPath: e.back_path,
-        frontPath: e.front_path,
-        accountId: e.account_id,
-        mobile: e.mobile
-      }
-      checkAccountVerified(params).then(res => {
-        this.dialogVisible = false
-        console.log(res)
-        if (res.code === 200) {
-          this.$notify({
-            title: res.data,
-            type: 'success'
+      this.$refs['form'].validate((valid) => {
+        if (valid) {
+          const params = {
+            id: this.map.id,
+            backPath: this.map.back_path,
+            frontPath: this.map.front_path,
+            accountId: this.map.account_id,
+            mobile: this.map.mobile,
+            name: this.form.name,
+            idCard: this.form.idCard
+          }
+          checkAccountVerified(params).then(res => {
+            this.dialogVisible = false
+            console.log(res)
+            if (res.code === 200) {
+              this.$notify({
+                title: res.data,
+                type: 'success'
+              })
+            } else {
+              this.$notify({
+                title: res.data,
+                type: 'fail'
+              })
+            }
+            this.getWaitCheckList(this.activeName)
           })
-        } else {
-          this.$notify({
-            title: res.data,
-            type: 'fail'
-          })
+          this.dialogFormVisible = false
         }
-        this.getWaitCheckList(this.activeName)
       })
     },
     check(e) {
@@ -275,7 +331,7 @@ export default {
         accountId: this.map.account_id,
         verifiedStat: 2,
         id: this.map.id,
-        msg: this.options[this.value].label
+        msg: this.options[this.value].label + ',请重新上传'
       }
       updateAccountVerifiedStat(params).then(res => {
         this.dialogVisible = false

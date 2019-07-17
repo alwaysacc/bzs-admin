@@ -111,7 +111,7 @@ export const getMenuIdByRoleId = (params) => {
 }
 // 报价记录
 export const getCarInfoQuote = (params) => {
-  return http.fetchPost('/carinfo/getCarInfoQuote', params)
+  return http.fetchPost('/carinfo/getCarInfoAndQuoteList', params)
 }
 export const quoteDetails = (params) => {
   return http.fetchPost('/quoteinfo/quoteDetails', params)
@@ -138,6 +138,9 @@ export const getCrawlingAdminList = (params) => {
 }
 export const getUserNameAndId = (params) => {
   return http.fetchPost('/account/info/getUserNameAndId', params)
+}
+export const getAccountById = (params) => {
+  return http.fetchPost('/thirdAccount/getAccountById', params)
 }
 export const addThirdAccount = (params) => {
   return http.fetchPost('/thirdAccount/add', params)

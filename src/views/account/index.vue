@@ -30,11 +30,11 @@
             <el-select v-if="isAdd" v-model="dataForm.accountId" style="width:100%;" placeholder="请选择">
               <el-option
                 v-for="(item, index) in userList"
-                :key="item.userName + index"
-                :label="item.userName"
-                :value="item.accountId"/>
+                :key="item.name + index"
+                :label="item.name"
+                :value="item.id"/>
             </el-select>
-            <el-input v-else v-model="dataForm.userName" disabled/>
+            <el-input v-else v-model="dataForm.name" disabled/>
           </el-form-item>
         </el-form>
         <span slot="footer" class="dialog-footer">
@@ -101,7 +101,7 @@
             </template>
           </el-table-column>-->
           <el-table-column
-            prop="userName"
+            prop="name"
             header-align="center"
             align="center"
             label="账号所属"
@@ -136,7 +136,7 @@
 </template>
 
 <script>
-import { getCrawlingAdminList, getUserNameAndId, addThirdAccount, updateThirdAccount ,deleteThirdAccount} from '../../api/userApi'
+import { getCrawlingAdminList, getAdminList, addThirdAccount, updateThirdAccount ,deleteThirdAccount} from '../../api/userApi'
 export default {
   components: {
   },
@@ -272,10 +272,10 @@ export default {
     getUserNameList() {
       const params = {
       }
-      getUserNameAndId(params).then(res => {
+      getAdminList(params).then(res => {
         console.log(res)
         if (res.code === 200) {
-          this.userList = res.data
+          this.userList = res.data.list
         }
       })
     },

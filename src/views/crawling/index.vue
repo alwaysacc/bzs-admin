@@ -5,7 +5,7 @@
         <!-- 搜索 -->
         <el-button class="filter-item" size="mini" type="success" @click="toDownload">下载模板</el-button>
         <div style="display: inline-block;margin: 0px 2px;">
-          <el-button class="filter-item" size="mini" type="primary" @click="dialog = true">点击上传</el-button>
+          <el-button class="filter-item" size="mini" type="primary" @click="showDialog()">点击上传</el-button>
         </div>
         <div style="display: inline-block;margin: 0px 2px;">
           <el-button :disabled="dataListSelections.length <= 0" class="filter-item" type="danger" @click="deleteHandle()">批量删除</el-button>
@@ -37,6 +37,15 @@
               <el-radio :label="2">车架号</el-radio>
             </el-radio-group>
           </el-form-item>
+          <el-form-item prop="accountId" label="选择账号">
+            <el-select v-model="dataForm.accountId" placeholder="请选择">
+              <el-option
+                v-for="(item, index) in userList"
+                :key="item.accountName + index"
+                :label="item.accountName"
+                :value="item.thirdInsuranceId"/>
+            </el-select>
+          </el-form-item>
           <el-form-item label="选择文件">
             <el-upload
               ref="upload"
@@ -52,8 +61,8 @@
               :on-change="beforeAvatarUpload"
               :data="dataForm"
               :action="url"
+              :show-file-list="true"
               accept=".xls,.xlsx"
-              show-file-list="false"
               class="upload-demo"
               multiple>
               <el-button class="filter-item" size="mini" type="primary">选择文件</el-button>
@@ -181,7 +190,7 @@
 </template>
 
 <script>
-import { getCrawlingList, startCrawling, getProgress, deleteCrawling } from '../../api/userApi'
+import { getCrawlingList, startCrawling, getProgress, deleteCrawling, getAccountById } from '../../api/userApi'
 export default {
   components: {
   },
@@ -194,6 +203,8 @@ export default {
       form: { name: '', depts: [], remark: '', dataScope: '本级', level: 3 },
       rules: {
         type:
+          [{ required: true, message: '必选', trigger: 'blur' }],
+        accountId:
           [{ required: true, message: '必选', trigger: 'blur' }]
       },
       visible: false,
@@ -210,12 +221,13 @@ export default {
       roleList: {},
       isAdd: true,
       dataForm: {
-        createBy: 1,
-        type: ''
+        type: '',
+        accountId: ''
       },
       url: '',
       fileList: [],
-      uploadStat: false
+      uploadStat: false,
+      userList: {}
     }
   },
   created() {
@@ -258,6 +270,7 @@ export default {
       }
     },
     submitUpload() {
+      console.log(this.dataForm)
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           if (!this.uploadStat) {
@@ -266,13 +279,27 @@ export default {
               type: 'warning'
             })
           } else {
-            console.log(this.url)
             const user = JSON.parse(this.$store.getters.user)
             this.dataForm.createBy = user.id
-            console.log(this.dataForm)
             this.$refs.upload.submit()
             this.dialog = false
           }
+        }
+      })
+    },
+    showDialog() {
+      this.dialog = true
+      this.getAccountById()
+    },
+    getAccountById() {
+      const user = JSON.parse(this.$store.getters.user)
+      const params = {
+        id: user.id
+      }
+      getAccountById(params).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          this.userList = res.data
         }
       })
     },
