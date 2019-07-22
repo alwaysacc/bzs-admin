@@ -15,11 +15,11 @@
           <i class="el-icon-caret-bottom"/>
         </div>
         <el-dropdown-menu slot="dropdown">
-          <span style="display:block;" @click="show = true">
+        <!--  <span style="display:block;" @click="show = true">
             <el-dropdown-item>
               布局设置
             </el-dropdown-item>
-          </span>
+          </span>-->
           <span style="display:block;" @click="dialog=true">
             <el-dropdown-item>
               修改密码

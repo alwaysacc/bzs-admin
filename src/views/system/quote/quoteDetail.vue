@@ -372,9 +372,9 @@
               <el-col span="12">商业险起保时间：{{ map.insuredInfo.nextBusinesStartDate }}</el-col>
             </el-row>
           </div>
-          <div class="baojia-div" v-if="!quoteMsg">
+          <div v-if="!quoteMsg" class="baojia-div">
             <div class="leftDiv">
-              <div v-if="R" :class="{a:b1}" class="sourceDiv" @click="onLi(1)">
+              <div v-if="R" :class="b1?'a':'b'" class="sourceDiv" @click="onLi(1)">
                 <div>
                   <img src="http://bao.91bihu.com/resources/images/quote/rb.png">
                 </div>
@@ -384,7 +384,7 @@
                   <a class="red-a">{{ Rquote.total }}</a>
                 </div>
               </div>
-              <div v-if="T" :class="{a:b2}" class="sourceDiv" @click="onLi(2)">
+              <div v-if="T" :class="b2?'a':'b'" class="sourceDiv" @click="onLi(2)">
                 <div ><img src="http://bao.91bihu.com/resources/images/quote/tpy.png"></div>
                 <div style="padding-top: 5px">
                   <a class="blod-a">太平洋</a><a class="small-a">({{ Tquote.quoteStatus==1?'报价成功':'报价失败' }})</a>
@@ -392,7 +392,7 @@
                   <a class="red-a">{{ Tquote.total }}{{ Tquote.total==''?'':'元' }}</a>
                 </div>
               </div>
-              <div v-if="P" :class="{a:b3}" class="sourceDiv" @click="onLi(3)">
+              <div v-if="P" :class="b3?'a':'b'" class="sourceDiv" @click="onLi(3)">
                 <div span="8"><img src="http://bao.91bihu.com/resources/images/quote/pa.png"></div>
                 <div span="16" style="padding-top: 5px">
                   <a class="blod-a">平安</a><a class="small-a">({{ Pquote.quoteStatus==1?'报价成功':'报价失败' }})</a>
@@ -458,19 +458,34 @@
                   <el-col span="5">交通违法浮动系数:</el-col>
                   <el-col span="3">{{ Rquote.trafficIllegalRate==null?0:Rquote.trafficIllegalRate }}</el-col>
                   <el-col span="4">折扣系数:</el-col>
-                  <el-col span="4">{{ Rquote.discountRate==null?0:Rquote.discountRate }}</el-col>
-                  <el-col span="8" />
-                </el-row>
-                <el-row class="bot-row">
-                  <el-col span="3">
+                  <el-col span="4">{{ Rquote.totalRate==null?0:Rquote.totalRate }}</el-col>
+                  <el-col span="4">
                     报价渠道：
                   </el-col>
-                  <el-col span="21">
+                  <el-col span="4">
                     保之顺
                   </el-col>
                 </el-row>
+                <el-row class="bot-row" v-if="Rquote.quoteStatus==1">
+                  <el-col style="border: #99a9bf 1px solid;" span="12">
+                    <el-row style="border-bottom: 1px slategrey solid; padding-left: 20%;text-align: left">
+                      交强险:{{ Rquote.forceTotal }}元
+                    </el-row>
+                    <el-row style="border-bottom: 1px slategrey solid; padding-left: 20%;text-align: left">
+                      车船税:{{ Rquote.taxTotal }}元
+                    </el-row>
+                    <el-row style="padding-left: 20%;text-align: left">
+                      商业险:{{ Rquote.bizTotal }}元
+                    </el-row>
+                  </el-col>
+                  <el-col style="border: #99a9bf 1px solid;padding-top: 1px; " span="12">
+                    <el-row style="padding-left: 20%;text-align: left; height: 6em;line-height: 6em;">
+                      合计保费:{{ Rquote.total }}元
+                    </el-row>
+                  </el-col>
+                </el-row>
                 <el-row>
-                  <el-col span="20">
+                  <el-col span="24">
                     <el-table
                       :data="RquoteList"
                       border
@@ -485,11 +500,19 @@
                       <el-table-column
                         prop="insurance_amount"
                         label="保险金额/责任限额"
-                      />
+                      >
+                        <template slot-scope="scope">
+                          {{ scope.row.insurance_amount=='1'?'投保':scope.row.insurance_amount }}
+                        </template>
+                      </el-table-column>
                       <el-table-column
                         prop="insurance_premium"
                         label="保险费(元)"
-                      />
+                      >
+                        <template slot-scope="scope">
+                          {{ scope.row.insurance_name=='交强险'?Rquote.forceTotal:scope.row.insurance_premium }}
+                        </template>
+                      </el-table-column>
                     </el-table>
                   </el-col>
                 </el-row>
@@ -550,19 +573,38 @@
                   <el-col span="5">交通违法浮动系数:</el-col>
                   <el-col span="3">{{ Tquote.trafficIllegalRate==null?0:Tquote.trafficIllegalRate }}</el-col>
                   <el-col span="4">折扣系数:</el-col>
-                  <el-col span="4">{{ Tquote.discountRate==null?0:Tquote.discountRate }}</el-col>
-                  <el-col span="8" />
-                </el-row>
-                <el-row class="bot-row">
-                  <el-col span="3">
+                  <el-col span="4">{{ Tquote.totalRate==null?0:Tquote.totalRate }}</el-col>
+                  <el-col span="4">
                     报价渠道：
                   </el-col>
-                  <el-col span="21">
+                  <el-col span="4">
                     保之顺
                   </el-col>
                 </el-row>
+                <el-row class="bot-row" v-if="Tquote.quoteStatus==1">
+                  <el-col style="border: #99a9bf 1px solid;" span="12">
+                    <el-row style="border-bottom: 1px slategrey solid; padding-left: 20%;text-align: left">
+                      交强险:{{ Tquote.forceTotal }}元
+                    </el-row>
+                    <el-row style="border-bottom: 1px slategrey solid; padding-left: 20%;text-align: left">
+                      车船税:{{ Tquote.taxTotal }}元
+                    </el-row>
+                    <el-row style="padding-left: 20%;text-align: left">
+                      商业险:{{ Tquote.bizTotal }}元
+                    </el-row>
+                   </el-col>
+                  <el-col style="border: #99a9bf 1px solid;padding-top: 1px; " span="12">
+                    <el-row style="padding-left: 20%;text-align: left; height: 6em;line-height: 6em;">
+                      合计保费:{{ Tquote.total }}元
+                    </el-row>
+                  </el-col>
+                </el-row>
+  <!--              <el-row class="bot-row">
+                  <el-col span="12" style="border: #99a9bf 1px solid; padding-left: 10%;text-align: left">商业险总额:{{ Tquote.bizTotal }}</el-col>
+                  <el-col span="12" style="border: #99a9bf 1px solid; padding-left: 10%;text-align: left"></el-col>
+                </el-row>-->
                 <el-row>
-                  <el-col span="20">
+                  <el-col span="24">
                     <el-table
                       :data="TquoteList"
                       :span-method="arraySpanMethod"
@@ -578,11 +620,19 @@
                       <el-table-column
                         prop="insurance_amount"
                         label="保险金额/责任限额"
-                      />
+                      >
+                        <template slot-scope="scope">
+                          {{ scope.row.insurance_amount=='1'?'投保':scope.row.insurance_amount }}
+                        </template>
+                      </el-table-column>
                       <el-table-column
                         prop="insurance_premium"
                         label="保险费(元)"
-                      />
+                      >
+                        <template slot-scope="scope">
+                          {{ scope.row.insurance_name=='交强险'?Tquote.forceTotal:scope.row.insurance_premium }}
+                        </template>
+                      </el-table-column>
                     </el-table>
                   </el-col>
                 </el-row>
@@ -643,19 +693,34 @@
                   <el-col span="5">交通违法浮动系数:</el-col>
                   <el-col span="3">{{ Pquote.trafficIllegalRate==null?0:Pquote.trafficIllegalRate }}</el-col>
                   <el-col span="4">折扣系数:</el-col>
-                  <el-col span="4">{{ Pquote.discountRate==null?0:Pquote.discountRate }}</el-col>
-                  <el-col span="8" />
-                </el-row>
-                <el-row class="bot-row">
-                  <el-col span="3">
+                  <el-col span="4">{{ Pquote.totalRate==null?0:Pquote.totalRate }}</el-col>
+                  <el-col span="4">
                     报价渠道：
                   </el-col>
-                  <el-col span="21">
+                  <el-col span="4">
                     保之顺
                   </el-col>
                 </el-row>
+                <el-row class="bot-row" v-if="Pquote.quoteStatus==1">
+                  <el-col style="border: #99a9bf 1px solid;" span="12">
+                    <el-row style="border-bottom: 1px slategrey solid; padding-left: 20%;text-align: left">
+                      交强险:{{ Pquote.forceTotal }}元
+                    </el-row>
+                    <el-row style="border-bottom: 1px slategrey solid; padding-left: 20%;text-align: left">
+                      车船税:{{ Pquote.taxTotal }}元
+                    </el-row>
+                    <el-row style="padding-left: 20%;text-align: left">
+                      商业险:{{ Pquote.bizTotal }}元
+                    </el-row>
+                  </el-col>
+                  <el-col style="border: #99a9bf 1px solid;padding-top: 1px; " span="12">
+                    <el-row style="padding-left: 20%;text-align: left; height: 6em;line-height: 6em;">
+                      合计保费:{{ Pquote.total }}元
+                    </el-row>
+                  </el-col>
+                </el-row>
                 <el-row>
-                  <el-col span="20">
+                  <el-col span="24">
                     <el-table
                       :data="PquoteList"
                       :span-method="arraySpanMethod"
@@ -671,11 +736,19 @@
                       <el-table-column
                         prop="insurance_amount"
                         label="保险金额/责任限额"
-                      />
+                      >
+                        <template slot-scope="scope">
+                          {{ scope.row.insurance_amount=='1'?'投保':scope.row.insurance_amount }}
+                        </template>
+                      </el-table-column>
                       <el-table-column
                         prop="insurance_premium"
                         label="保险费(元)"
-                      />
+                      >
+                        <template slot-scope="scope">
+                          {{ scope.row.insurance_name=='交强险'?Pquote.forceTotal:scope.row.insurance_premium }}
+                        </template>
+                      </el-table-column>
                     </el-table>
                   </el-col>
                 </el-row>
@@ -735,7 +808,7 @@ export default {
       quote: false,
       radio2: false,
       show: false,
-      activeName: 'first',
+      activeName: 'second',
       map: [],
       customer: {
         createdBy: '',
@@ -823,31 +896,13 @@ export default {
         carInfoId: e
       }
       quoteDetails(params).then(res => {
-        if (res.code == 200) {
+        if (res.code === 200) {
+          console.log(res.data)
           this.map = res.data
           this.insuredList = this.map.insuredList
           if (this.map.customer == null) {
             this.map.customer = this.customer
           }
-
-          const list = res.data.insuredList
-          for (let i = 0; i < list.length; i++) {
-            if (list[i].insurance_amount == 0) {
-              this.map.insuredList[i].insurance_amount = '投保'
-            }
-            if (list[i].excluding_deductible != '0.00') {
-              list[i].insurance_name = list[i].insurance_name + '(不计免赔)'
-              /* let insu = list[i]
-              list[i].insurance_name = insu.insurance_name + '(不计免赔)'
-              list[i].insurance_amount = '投保'
-              list[i].insurance_premium = insu.excluding_deductible
-              list[i].excluding_deductible = null*/
-            }
-          }
-          /*   console.log(list)
-          console.log( res.data.insuredList)
-          console.log( this.insuredList)
-          this.insuredList=this.insuredList.concat(list)*/
           if (this.map.insuredInfo == null) {
             this.map.insuredInfo = this.insuredInfo
           }
@@ -917,7 +972,6 @@ export default {
       })
     },
     onLi(e) {
-      console.log(e)
       switch (e) {
         case 1:
           this.b1 = false
@@ -941,7 +995,6 @@ export default {
           this.quoteMap.quoteList = this.PquoteList
           break
       }
-      console.log(this.quoteMap)
     },
     back() {
       this.$router.back(-1)
@@ -1024,6 +1077,7 @@ export default {
     min-width: 200px;
   }
   .baojia-div .rightDiv{
+    margin-left: 20px;
     width: 800px;
   }
   .sourceDiv{
@@ -1036,9 +1090,11 @@ export default {
     cursor: pointer;
   }
   .a {
-    background-color: #F8F8F8;
+    background-color: #f2f2f2;
   }
-
+  .b{
+    border-left: red 2px solid;
+  }
   .blod-a {
     font-weight: bold;
   }

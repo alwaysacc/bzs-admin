@@ -312,9 +312,9 @@ export default {
     getQuoteDetail(e) {
       this.$router.push({ path: '/quoteDetail', query: { car_info_id: e }})
     },
-    handleClick(tab, event) {
-      console.log(tab, event)
-    },
+    // handleClick(tab, event) {
+    //   console.log(tab, event)
+    // },
     getUserList() {
       this.dataListLoading = true
       const params = {
