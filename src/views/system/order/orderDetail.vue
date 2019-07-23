@@ -25,8 +25,24 @@
     </el-row>
     <el-row class="line">
       <el-col span="20">
+        <a style="font-weight: bold">配送信息</a>
+      </el-col>
+      <el-col span="4" />
+    </el-row>
+    <el-row class="row">
+      <el-col span="6">
+        联系人姓名：{{ map.orderInfo.contactName }}
+      </el-col>
+      <el-col span="6">
+        联系人电话：{{ map.orderInfo.contactTel }}
+      </el-col>
+      <el-col span="12">
+        配送地址：{{ map.orderInfo.deliveryAddress }}
+      </el-col>
+    </el-row>
+    <el-row class="line">
+      <el-col span="20">
         <a style="font-weight: bold">车主信息</a>
-
       </el-col>
       <el-col span="4" />
     </el-row>

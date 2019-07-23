@@ -11,11 +11,11 @@
       </template>
       <el-dropdown class="avatar-container right-menu-item" trigger="click">
         <div class="avatar-wrapper">
-          <img :src="user.avatar" class="user-avatar">
+          <img src="http://img.cdn.baozhishun.com/u=3022733732,2743307970&fm=26&gp=0.jpg" class="user-avatar">
           <i class="el-icon-caret-bottom"/>
         </div>
         <el-dropdown-menu slot="dropdown">
-        <!--  <span style="display:block;" @click="show = true">
+          <!--  <span style="display:block;" @click="show = true">
             <el-dropdown-item>
               布局设置
             </el-dropdown-item>
@@ -112,7 +112,7 @@ export default {
   computed: {
     ...mapGetters([
       'sidebar',
-      'user',
+      'index.vue',
       'device'
     ]),
     show: {
