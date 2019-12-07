@@ -11,17 +11,6 @@
           <el-button :disabled="dataListSelections.length <= 0" class="filter-item" type="danger" @click="deleteHandle()">批量删除</el-button>
         </div>
       </div>
-      <!-- 搜索 -->
-
-      <!-- 新增
-        <div v-permission="['ADMIN','ROLES_ALL','ROLES_CREATE']" style="display: inline-block;margin: 0px 2px;">
-          <el-button
-            class="filter-item"
-            type="primary"
-            icon="el-icon-plus"
-            @click="addOrUpdate">上传</el-button>
-          <eForm ref="form" :is-add="true"/>
-        </div>-->
       <el-dialog
         :visible.sync="dialog"
         :modal-append-to-body="false"

@@ -168,3 +168,13 @@ export const updateThirdAccount = (params) => {
 export const deleteThirdAccount = (params) => {
   return http.fetchPost('/thirdAccount/delete', params)
 }
+// 轮播图
+export const swiperList = (params) => {
+  return http.fetchPost('/swiper/list', params)
+}
+export const addSwiper = (params) => {
+  return http.fetchPost('/swiper/add', params)
+}
+export const deleteSwiper = (params) => {
+  return http.fetchPost('/swiper/delete', params)
+}

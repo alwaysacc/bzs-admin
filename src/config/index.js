@@ -36,7 +36,7 @@ export default {
   /**
    * @description 固定头部
    */
-  fixedHeader: true,
+  fixedHeader: false,
 
   /**
    * @description 是否显示logo
@@ -46,5 +46,5 @@ export default {
   /**
    * 是否显示设置的悬浮按钮
    */
-  settingBtn: false
+  settingBtn: true
 }

@@ -18,7 +18,7 @@
           <el-form-item>
             <el-button type="primary" @click="toQuery">查询</el-button>
             <!--        <el-button type="primary" @click="addOrUpdateHandle()">新增</el-button>-->
-            <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量删除</el-button>
+<!--            <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量删除</el-button>-->
           </el-form-item>
           <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane label="全部" name="9"/>

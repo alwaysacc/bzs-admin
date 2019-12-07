@@ -99,7 +99,7 @@ export const constantRouterMap = [
         path: 'center',
         component: () => import('@/views/system/user/center'),
         name: '个人中心',
-        meta: { title: '个人中心', icon: 'user' }
+        meta: { title: '个人中心', icon: 'index.vue' }
       }
     ]
   }
