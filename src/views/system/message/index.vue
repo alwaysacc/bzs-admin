@@ -12,15 +12,15 @@
           icon="el-icon-plus"
           @click="addRole">新增</el-button>
       </div>
-      <el-dialog :visible.sync="dialog" :title="isAdd ? '新增角色' : '编辑角色'" top="0" append-to-body width="500px" style="height: 100%" height="100%">
+      <el-dialog :visible.sync="dialog" :title="isAdd ? '新增消息' : '编辑角色'" append-to-body width="500px" style="height: 100%" height="100%">
         <el-form ref="form" :model="form" :rules="rules" size="small" label-width="80px">
-          <el-form-item label="角色名称" prop="name">
-            <el-input v-model="form.name" style="width: 370px;"/>
+          <el-form-item label="标题" prop="name">
+            <el-input v-model="form.title" style="width: 370px;"/>
           </el-form-item>
-          <el-form-item label="描述信息">
-            <el-input v-model="form.remark" style="width: 370px;" rows="5" type="textarea"/>
+          <el-form-item label="内容">
+            <el-input v-model="form.content" style="width: 370px;" rows="6" type="textarea"/>
           </el-form-item>
-          <el-form-item label="选择权限">
+          <!-- <el-form-item label="选择权限">
             <el-tree
               ref="tree"
               :data="data"
@@ -31,7 +31,7 @@
               node-key="id"
               highlight-current
               @check-change="handleCheckChange"/>
-          </el-form-item>
+          </el-form-item>-->
         </el-form>
         <div slot="footer" class="dialog-footer">
           <el-button type="text" @click="dialog=false">取消</el-button>
@@ -67,16 +67,16 @@
             label="ID"
           />
           <el-table-column
-            prop="name"
+            prop="title"
             header-align="center"
             align="center"
-            label="名称"
+            label="标题"
           />
           <el-table-column
-            prop="remark"
+            prop="content"
             header-align="center"
             align="center"
-            label="描述"
+            label="内容"
           />
           <el-table-column
             prop="createTime"
@@ -88,14 +88,14 @@
               {{ util.formatTime(scope.row.createTime) }}
             </template>
           </el-table-column>
-          <el-table-column
+        <!--  <el-table-column
             fixed="right"
             header-align="center"
             align="center"
             width="200"
             label="操作"
           >
-            <template slot-scope="scope">
+            &lt;!&ndash;<template slot-scope="scope">
               <el-button type="primary" size="small" icon="el-icon-edit" @click="addRole(scope.row)"/>
               <el-popover
                 :ref="scope.row.id"
@@ -108,8 +108,8 @@
                 </div>
                 <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
               </el-popover>
-            </template>
-          </el-table-column>
+            </template>&ndash;&gt;
+          </el-table-column>-->
         </el-table>
         <el-pagination
           :current-page="pageIndex"
@@ -133,24 +133,24 @@ import { del } from '@/api/role'
 import { getPermissionTree } from '@/api/permission'
 import { getMenusTree } from '@/api/menu'
 import { parseTime } from '@/utils/index'
-import eHeader from './module/header'
-import edit from './module/edit'
+// import eHeader from './module/header'
+// import edit from './module/edit'
 import { editPermission, editMenu, get } from '@/api/role'
-import { getRoleList, getMenulist, addRoleAndMenu, deleteRole, updateRole, getMenuIdByRoleId } from '../../../api/userApi'
+import { getMenulist,getMessageList, addRoleAndMenu, deleteRole, addMessage, getMenuIdByRoleId } from '../../../api/userApi'
 
 export default {
-  components: { eHeader, edit },
+  // components: { eHeader, edit },
   mixins: [initData],
   data() {
     return {
       downloadLoading: false,
       dateScopes: ['全部', '本级', '自定义'],
       loading: false, dialog: false, depts: [], deptIds: [],
-      form: { name: '', remark: '' },
+      form: { title: '', content: '' },
       isAdd: true,
       rules: {
-        name: [
-          { required: true, message: '请输入名称', trigger: 'blur' }
+        title: [
+          { required: true, message: '请输入标题', trigger: 'blur' }
         ]
       },
       visible: false,
@@ -179,7 +179,7 @@ export default {
     }
   },
   created() {
-    this.getRoleList()
+    this.getMessageList()
   },
   activated() {
   },
@@ -190,13 +190,13 @@ export default {
       console.log( this.$refs.tree.getHalfCheckedKeys());
       console.log(a);*/
     },
-    getRoleList() {
+      getMessageList() {
       this.dataListLoading = true
       const params = {
         page: this.pageIndex,
         size: this.pageSize
       }
-      getRoleList(params).then(res => {
+          getMessageList(params).then(res => {
         console.log(res)
         if (res.code === 200) {
           this.dataList = res.data.list
@@ -212,12 +212,12 @@ export default {
     sizeChangeHandle(val) {
       this.pageSize = val
       this.pageIndex = 1
-      this.getRoleList()
+      this.getMessageList()
     },
     // 当前页
     currentChangeHandle(val) {
       this.pageIndex = val
-      this.getRoleList()
+      this.getMessageList()
     },
     // 多选
     selectionChangeHandle(val) {
@@ -264,41 +264,21 @@ export default {
     doSubmit() {
       this.$refs['form'].validate((valid) => {
         if (valid) {
-          if (this.$refs.tree.getCheckedKeys().length != 0) {
-            if (this.isAdd) {
-              this.dialog = false
-              const param = this.form
-              param.menuId = JSON.stringify(this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys()))
-              addRoleAndMenu(param).then(res => {
-                console.log(res)
-                this.$notify({
-                  title: '保存成功',
-                  type: 'success'
-                })
-                this.getRoleList()
+          this.dialog = false
+          const param = this.form
+          addMessage(param).then(res => {
+            if (res.code === 200) {
+              this.$notify({
+                title: '保存成功',
+                type: 'success'
               })
             } else {
-              delete this.form.createTime
-              const param = this.form
-              param.menuId = JSON.stringify(this.$refs.tree.getCheckedKeys().concat(this.$refs.tree.getHalfCheckedKeys()))
-              param.beforeMenuId = JSON.stringify(this.checkedArray)
-              this.dialog = false
-              updateRole(param).then(res => {
-                console.log(res)
-                this.$notify({
-                  title: '操作成功',
-                  type: 'success'
-                })
-                this.getRoleList()
+              this.$notify.error({
+                title: '保存失败'
               })
             }
-          } else {
-            this.$notify({
-              title: '请选择权限',
-              type: 'warning'
-            })
-            return
-          }
+            this.getMessageList()
+          })
         }
       })
     },
@@ -313,7 +293,7 @@ export default {
           type: 'success'
         })
         this.$refs[e].doClose()
-        this.getRoleList()
+        this.getMessageList()
       })
     },
     parseTime,

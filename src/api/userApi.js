@@ -98,7 +98,24 @@ export const updateCommission = (params) => {
 export const getDrawCashList = (params) => {
   return http.fetchPost('/draw/cash/getDrawCashList', params)
 }
+export const getShowToday = (params) => {
+  return http.fetchPost('/sys/param/getShowToday', params)
+}
+export const getRole = (params) => {
+  return http.fetchPost('/sys/param/getRole', params)
+}
 
+export const updateShowToday = (params) => {
+  return http.fetchPost('/sys/param/update', params)
+}
+
+//消息
+export const addMessage = (params) => {
+  return http.fetchPost('/message/add', params)
+}
+export const getMessageList = (params) => {
+  return http.fetchPost('/message/list', params)
+}
 // 菜单
 export const getMenuByAdminName = (params) => {
   return http.fetchPost('/admin/menu/getMenuByAdminName', params)

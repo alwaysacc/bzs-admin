@@ -2,16 +2,27 @@
   <div class="app-container">
     <el-row :gutter="20">
       <el-col :xs="24" :sm="24" :md="24" :lg="24" :xl="24">
-        <!--<el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
-      <el-form-item>
-        <el-input v-model="dataForm.userName" placeholder="用户名" clearable />
-      </el-form-item>
-      <el-form-item>
-        <el-button @click="getDataList()">查询</el-button>
-        <el-button type="primary" @click="addOrUpdateHandle()">新增</el-button>
-        <el-button type="danger" :disabled="dataListSelections.length <= 0" @click="deleteHandle()">批量删除</el-button>
-      </el-form-item>
-    </el-form>-->
+        <el-form :inline="true" :model="dataForm" @keyup.enter.native="getDataList()">
+          <el-form-item label="是否展示今日佣金：">
+            <el-switch
+              v-model="showTodayComm"
+              active-color="#13ce66"
+              inactive-color="#ff4949"
+              active-text="开启"
+              inactive-text="关闭"
+              active-value="1"
+              inactive-value="2"
+              @change="updateValue" />
+          </el-form-item>
+          <div style="display: inline-block;margin: 0px 2px;">
+            <el-button
+              class="filter-item"
+              type="primary"
+              icon="el-icon-plus"
+              @click="showDialog">分佣规则设置
+            </el-button>
+          </div>
+        </el-form>
         <el-tabs v-model="activeName" @tab-click="handleClick">
           <el-tab-pane label="佣金设置" name="1">
             <el-table
@@ -202,21 +213,35 @@
               :page-sizes="[10, 20, 50, 100]"
               :page-size="pageSize"
               :total="totalPage"
+
               layout="total, sizes, prev, pager, next, jumper"
               @size-change="sizeChangeHandle"
               @current-change="currentChangeHandle"
             />
           </el-tab-pane>
         </el-tabs>
-        <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshList="getCommissionList" />
+        <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshList="getCommissionList"/>
       </el-col>
     </el-row>
+
+    <el-dialog :visible.sync="dialogFormVisible" :append-to-body="true" title="分佣规则">
+      <el-form :model="form">
+        <el-form-item label="分佣规则">
+          <el-input v-model="value" :value="value" :rows="5" type="textarea"/>
+        </el-form-item>
+      </el-form>
+      <div slot="footer" class="dialog-footer">
+        <el-button @click="dialogFormVisible = false">取 消</el-button>
+        <el-button type="primary" @click="updateRole">确 定</el-button>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
 <script>
-import { commissionList, deleteUser, getCommissionListByDay } from '../../../api/userApi'
+import { commissionList, deleteUser, getCommissionListByDay, getShowToday, updateShowToday, getRole } from '../../../api/userApi'
 import addOrUpdate from './add-or-update'
+
 export default {
   components: {
     addOrUpdate
@@ -234,13 +259,18 @@ export default {
       dataListLoading: false,
       dataListSelections: [],
       addOrUpdateVisible: false,
-      comList: ''
+      comList: '',
+      showTodayComm: 1,
+      dialogFormVisible: false,
+      value: ''
+
     }
   },
   activated() {
     this.getCommissionList()
   },
   created() {
+    this.getShowToday()
     this.getCommissionList()
   },
   methods: {
@@ -263,8 +293,7 @@ export default {
     },
     getCommissionList() {
       this.dataListLoading = true
-      const params = {
-      }
+      const params = {}
       commissionList(params).then(res => {
         console.log(res)
         if (res.code === 200) {
@@ -276,6 +305,71 @@ export default {
         }
         this.dataListLoading = false
       })
+    },
+    updateValue(e) {
+      console.log(e)
+      this.dataListLoading = true
+      const params = {
+        id: 1,
+        value: e
+      }
+      updateShowToday(params).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          this.$message({
+            message: '成功',
+            type: 'success'
+          })
+        } else {
+          this.$message({
+            message: '失败',
+            type: 'warning'
+          })
+        }
+        this.dataListLoading = false
+      })
+    },
+    updateRole(e) {
+      this.dataListLoading = true
+      const params = {
+        id: 2,
+        value: this.value
+      }
+      updateShowToday(params).then(res => {
+        if (res.code === 200) {
+          this.$message({
+            message: '成功',
+            type: 'success'
+          })
+        } else {
+          this.$message({
+            message: '失败',
+            type: 'warning'
+          })
+        }
+        this.dataListLoading = false
+        this.dialogFormVisible = false
+      })
+    },
+    getShowToday() {
+      const params = {}
+      getShowToday(params).then(res => {
+        console.log(res)
+        this.showTodayComm = res.data
+        /* if (res.code === 200) {
+        } else {
+        }*/
+      })
+    },
+    showDialog() {
+      const params = {}
+      getRole(params).then(res => {
+        console.log(res)
+        if (res.code === 200) {
+          this.value = res.data
+        }
+      })
+      this.dialogFormVisible = true
     },
     handleClick(e) {
       if (e.name === '2') {
@@ -289,12 +383,12 @@ export default {
     sizeChangeHandle(val) {
       this.pageSize = val
       this.pageIndex = 1
-      this.getUserList()
+      this.getCommissionListByDay()
     },
     // 当前页
     currentChangeHandle(val) {
       this.pageIndex = val
-      this.getUserList()
+      this.getCommissionListByDay()
     },
     // 多选
     selectionChangeHandle(val) {
@@ -334,7 +428,8 @@ export default {
             this.$message.error(res.data)
           }
         })
-      }).catch(() => {})
+      }).catch(() => {
+      })
     }
   }
 }

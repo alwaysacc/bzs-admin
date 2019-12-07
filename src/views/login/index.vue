@@ -12,7 +12,7 @@
           <svg-icon slot="prefix" icon-class="password" class="el-input__icon" style="height: 39px;width: 13px;margin-left: 2px;" />
         </el-input>
       </el-form-item>
-      <el-form-item prop="code" :error="errorMsg">
+      <el-form-item :error="errorMsg" prop="code">
         <div style="display: flex; align-items: left">
           <el-input v-model="loginForm.code" style="width: 60%" placeholder="验证码" @keyup.enter.native="handleLogin">
             <svg-icon slot="prefix" icon-class="zujian" class="el-input__icon" style="height: 39px;width: 13px;margin-left: 2px;" />
@@ -109,8 +109,8 @@ export default {
       this.$refs.loginForm.validate(valid => {
         const user = this.loginForm
         if (valid) {
-          console.log(this.loginForm.code.toUpperCase())
-          console.log(this.checkCode)
+          // console.log(this.loginForm.code.toUpperCase())
+          // console.log(this.checkCode)
           console.log(this.checkCode === this.loginForm.code.toUpperCase())
           if (this.checkCode === this.loginForm.code.toUpperCase()) {
             this.loading = true
