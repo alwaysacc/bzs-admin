@@ -10,9 +10,16 @@
           class="filter-item"
           type="primary"
           icon="el-icon-plus"
-          @click="addRole">新增</el-button>
+          @click="addRole">新增
+        </el-button>
       </div>
-      <el-dialog :visible.sync="dialog" :title="isAdd ? '新增消息' : '编辑角色'" append-to-body width="500px" style="height: 100%" height="100%">
+      <el-dialog
+        :visible.sync="dialog"
+        :title="isAdd ? '新增消息' : '编辑角色'"
+        append-to-body
+        width="500px"
+        style="height: 100%"
+        height="100%">
         <el-form ref="form" :model="form" :rules="rules" size="small" label-width="80px">
           <el-form-item label="标题" prop="name">
             <el-input v-model="form.title" style="width: 370px;"/>
@@ -88,28 +95,49 @@
               {{ util.formatTime(scope.row.createTime) }}
             </template>
           </el-table-column>
-        <!--  <el-table-column
+          <el-table-column
             fixed="right"
             header-align="center"
             align="center"
-            width="200"
+            width="150"
             label="操作"
           >
-            &lt;!&ndash;<template slot-scope="scope">
-              <el-button type="primary" size="small" icon="el-icon-edit" @click="addRole(scope.row)"/>
+            <template slot-scope="scope">
               <el-popover
-                :ref="scope.row.id"
+                :ref="scope.row.mId"
                 placement="top"
                 width="160">
                 <p>确定删除吗？</p>
                 <div style="text-align: right; margin: 0">
-                  <el-button size="mini" type="text" @click="$refs[scope.row.id].doClose()">取消</el-button>
-                  <el-button type="primary" size="mini" @click="deleteRole(scope.row.id)">确定</el-button>
+                  <el-button size="mini" type="text" @click="$refs[scope.row.mId].doClose()">取消</el-button>
+                  <el-button type="primary" size="mini" @click="del(scope.row.mId)">确定</el-button>
                 </div>
                 <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
               </el-popover>
-            </template>&ndash;&gt;
-          </el-table-column>-->
+            </template>
+          </el-table-column>
+          <!--  <el-table-column
+              fixed="right"
+              header-align="center"
+              align="center"
+              width="200"
+              label="操作"
+            >
+              &lt;!&ndash;<template slot-scope="scope">
+                <el-button type="primary" size="small" icon="el-icon-edit" @click="addRole(scope.row)"/>
+                <el-popover
+                  :ref="scope.row.id"
+                  placement="top"
+                  width="160">
+                  <p>确定删除吗？</p>
+                  <div style="text-align: right; margin: 0">
+                    <el-button size="mini" type="text" @click="$refs[scope.row.id].doClose()">取消</el-button>
+                    <el-button type="primary" size="mini" @click="deleteRole(scope.row.id)">确定</el-button>
+                  </div>
+                  <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
+                </el-popover>
+              </template>&ndash;&gt;
+            </el-table-column>-->
         </el-table>
         <el-pagination
           :current-page="pageIndex"
@@ -129,14 +157,12 @@
 <script>
 import checkPermission from '@/utils/permission'
 import initData from '@/mixins/initData'
-import { del } from '@/api/role'
-import { getPermissionTree } from '@/api/permission'
-import { getMenusTree } from '@/api/menu'
 import { parseTime } from '@/utils/index'
-// import eHeader from './module/header'
-// import edit from './module/edit'
-import { editPermission, editMenu, get } from '@/api/role'
-import { getMenulist,getMessageList, addRoleAndMenu, deleteRole, addMessage, getMenuIdByRoleId } from '../../../api/userApi'
+import {
+  getMessageList,
+  addMessage,
+    delMessage
+} from '../../../api/userApi'
 
 export default {
   // components: { eHeader, edit },
@@ -186,17 +212,34 @@ export default {
   methods: {
     handleCheckChange(data, checked, indeterminate) {
       /*      let a=this.$refs.tree.getCheckedKeys().concat( this.$refs.tree.getHalfCheckedKeys())
-      console.log( this.$refs.tree.getCheckedKeys());
-      console.log( this.$refs.tree.getHalfCheckedKeys());
-      console.log(a);*/
+                console.log( this.$refs.tree.getCheckedKeys());
+                console.log( this.$refs.tree.getHalfCheckedKeys());
+                console.log(a);*/
     },
-      getMessageList() {
+    del(e) {
+      const params = {
+        id: e
+      }
+        delMessage(params).then(res => {
+        if (res.code === 200) {
+          this.$notify({
+            title: '操作成功',
+            type: 'success'
+          })
+          this.$refs[e].doClose()
+          this.getMessageList()
+        } else {
+          this.$message.error(res.data)
+        }
+      })
+    },
+    getMessageList() {
       this.dataListLoading = true
       const params = {
         page: this.pageIndex,
         size: this.pageSize
       }
-          getMessageList(params).then(res => {
+      getMessageList(params).then(res => {
         console.log(res)
         if (res.code === 200) {
           this.dataList = res.data.list
@@ -224,42 +267,8 @@ export default {
       this.dataListSelections = val
     },
     addRole(e) {
-      if (e.id) {
-        this.isAdd = false
-        this.form = e
-        this.getMenus()
-        const param = {
-          id: e.id
-        }
-        getMenuIdByRoleId(param).then(res => {
-          console.log(res)
-          this.checkedArray = res.data
-          this.dialog = true
-        })
-      } else {
-        this.isAdd = true
-        this.form = {}
-        this.checkedArray = []
-        this.getMenus()
-        this.dialog = true
-      }
-    },
-    getMenusByRoleId(e) {
-      const param = {
-        id: e
-      }
-      getMenulist(param).then(res => {
-        this.roleMenuList = res.data
-        console.log(res)
-      })
-    },
-    getMenus() {
-      const param = {
-      }
-      getMenulist(param).then(res => {
-        this.data = res.data
-        console.log(res)
-      })
+      this.isAdd = true
+      this.dialog = true
     },
     doSubmit() {
       this.$refs['form'].validate((valid) => {
@@ -282,155 +291,20 @@ export default {
         }
       })
     },
-    deleteRole(e) {
-      console.log(e)
-      const param = {
-        roleId: e
-      }
-      deleteRole(param).then(res => {
-        this.$notify({
-          title: '操作成功',
-          type: 'success'
-        })
-        this.$refs[e].doClose()
-        this.getMessageList()
-      })
-    },
     parseTime,
-    checkPermission,
-    beforeInit() {
-      this.$refs.permission.setCheckedKeys([])
-      this.$refs.menu.setCheckedKeys([])
-      this.showButton = false
-      this.url = 'api/roles'
-      const sort = 'level,asc'
-      const query = this.query
-      const value = query.value
-      this.params = { page: this.page, size: this.size, sort: sort }
-      if (value) { this.params['name'] = value }
-      return true
-    },
-    subDelete(id) {
-      this.delLoading = true
-      del(id).then(res => {
-        this.delLoading = false
-        this.$refs[id].doClose()
-        this.init()
-        this.$notify({
-          title: '删除成功',
-          type: 'success',
-          duration: 2500
-        })
-      }).catch(err => {
-        this.delLoading = false
-        this.$refs[id].doClose()
-        console.log(err.response.data.message)
-      })
-    },
-    getPermissions() {
-      getPermissionTree().then(res => {
-        this.permissions = res
-      })
-    },
-    handleCurrentChange(val) {
-      if (val) {
-        const _this = this
-        // 清空权限与菜单的选中
-        this.$refs.permission.setCheckedKeys([])
-        this.$refs.menu.setCheckedKeys([])
-        // 保存当前的角色id
-        this.currentId = val.id
-        // 点击后显示按钮
-        this.showButton = true
-        // 初始化
-        this.menuIds = []
-        this.permissionIds = []
-        // 菜单数据需要特殊处理
-        val.menus.forEach(function(data, index) {
-          let add = true
-          for (let i = 0; i < val.menus.length; i++) {
-            if (data.id === val.menus[i].pid) {
-              add = false
-              break
-            }
-          }
-          if (add) {
-            _this.menuIds.push(data.id)
-          }
-        })
-        // 处理权限数据
-        val.permissions.forEach(function(data, index) {
-          _this.permissionIds.push(data.id)
-        })
-      }
-    },
-    savePermission() {
-      this.permissionLoading = true
-      const role = { id: this.currentId, permissions: [] }
-      this.$refs.permission.getCheckedKeys().forEach(function(data, index) {
-        const permission = { id: data }
-        role.permissions.push(permission)
-      })
-      editPermission(role).then(res => {
-        this.$notify({
-          title: '保存成功',
-          type: 'success',
-          duration: 2500
-        })
-        this.permissionLoading = false
-        this.update()
-      }).catch(err => {
-        this.permissionLoading = false
-        console.log(err.response.data.message)
-      })
-    },
-    saveMenu() {
-      this.menuLoading = true
-      const role = { id: this.currentId, menus: [] }
-      // 得到半选的父节点数据，保存起来
-      this.$refs.menu.getHalfCheckedNodes().forEach(function(data, index) {
-        const permission = { id: data.id }
-        role.menus.push(permission)
-      })
-      // 得到已选中的 key 值
-      this.$refs.menu.getCheckedKeys().forEach(function(data, index) {
-        const permission = { id: data }
-        role.menus.push(permission)
-      })
-      editMenu(role).then(res => {
-        this.$notify({
-          title: '保存成功',
-          type: 'success',
-          duration: 2500
-        })
-        this.menuLoading = false
-        this.update()
-      }).catch(err => {
-        this.menuLoading = false
-        console.log(err.response.data.message)
-      })
-    },
-    update() {
-      // 无刷新更新 表格数据
-      get(this.currentId).then(res => {
-        for (let i = 0; i < this.data.length; i++) {
-          if (res.id === this.data[i].id) {
-            this.data[i] = res
-            break
-          }
-        }
-      })
-    }
+    checkPermission
   }
 }
 </script>
 
 <style rel="stylesheet/scss" lang="scss">
-  .app-container{
+  .app-container {
     overflow-y: visible;
   }
+
   .role-span {
-    font-weight: bold;color: #303133;
+    font-weight: bold;
+    color: #303133;
     font-size: 15px;
   }
 </style>

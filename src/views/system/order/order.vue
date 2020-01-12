@@ -13,12 +13,24 @@
             </el-select>
           </el-form-item>
           <el-form-item prop="userName">
-            <el-input v-model="queryForm.userName" :placeholder="queryForm.type==0?'车牌号':'创建人'" clearable />
+            <el-input v-model="queryForm.userName" :placeholder="queryForm.type==0?'车牌号':'创建人'" clearable/>
+          </el-form-item>
+          <el-form-item label="选择查询日期：">
+            <el-date-picker
+              v-model="queryForm.createTime"
+              :picker-options="pickerOptions"
+              type="daterange"
+              align="right"
+              unlink-panels
+              value-format="yyyy-MM-dd"
+              range-separator="至"
+              start-placeholder="开始日期"
+              end-placeholder="结束日期"/>
           </el-form-item>
           <el-form-item>
             <el-button type="primary" @click="toQuery">查询</el-button>
             <!--        <el-button type="primary" @click="addOrUpdateHandle()">新增</el-button>-->
-<!--            <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量删除</el-button>-->
+            <!--            <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量删除</el-button>-->
           </el-form-item>
           <el-tabs v-model="activeName" @tab-click="handleClick">
             <el-tab-pane label="全部" name="9"/>
@@ -48,12 +60,6 @@
             align="center"
           />
           <el-table-column
-            prop="user_name"
-            header-align="center"
-            align="center"
-            label="创建人"
-          />
-          <el-table-column
             prop="loginName"
             header-align="center"
             align="center"
@@ -64,6 +70,13 @@
               {{ util.formatTime(scope.row.create_time) }}
             </template>
           </el-table-column>
+          <el-table-column
+            prop="user_name"
+            header-align="center"
+            align="center"
+            label="创建人"
+          />
+
           <el-table-column
             prop="car_number"
             header-align="center"
@@ -125,10 +138,10 @@
             label="订单状态"
           >
             <template slot-scope="scope">
-              <el-tag v-if="scope.row.pay_status === 0" size="small" type="danger">待支付</el-tag>
+              <el-tag v-if="scope.row.pay_status === 0" size="small" type="success" >待支付</el-tag>
               <el-tag v-else-if="scope.row.pay_status === 1" size="small">已支付</el-tag>
-              <el-tag v-else-if="scope.row.pay_status === 2" size="small">已取消</el-tag>
-              <el-tag v-else size="small">已过期</el-tag>
+              <el-tag v-else-if="scope.row.pay_status === 2" type="danger" size="small">已取消</el-tag>
+              <el-tag v-else size="small" type="warning">已过期</el-tag>
             </template>
           </el-table-column>
           <el-table-column
@@ -163,17 +176,17 @@
 
             <template slot-scope="scope">
               <el-button type="primary" class="el-icon-view" size="small" @click="getOrderDetail(scope.row.order_id)"/>
-            <!--  <el-popover
-                :ref="scope.row.order_id"
-                placement="top"
-                width="160">
-                <p>确定删除吗？</p>
-                <div style="text-align: right; margin: 0">
-                  <el-button size="mini" type="text" @click="$refs[scope.row.order_id].doClose()">取消</el-button>
-                  <el-button type="primary" size="mini" @click="deleteAdmin(scope.row.id)">确定</el-button>
-                </div>
-                <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
-              </el-popover>-->
+              <!--  <el-popover
+                  :ref="scope.row.order_id"
+                  placement="top"
+                  width="160">
+                  <p>确定删除吗？</p>
+                  <div style="text-align: right; margin: 0">
+                    <el-button size="mini" type="text" @click="$refs[scope.row.order_id].doClose()">取消</el-button>
+                    <el-button type="primary" size="mini" @click="deleteAdmin(scope.row.id)">确定</el-button>
+                  </div>
+                  <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
+                </el-popover>-->
             </template>
           </el-table-column>
         </el-table>
@@ -187,7 +200,7 @@
           @current-change="currentChangeHandle"
         />
         <!-- 弹窗, 新增 / 修改 -->
-        <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList" />
+        <add-or-update v-if="addOrUpdateVisible" ref="addOrUpdate" @refreshDataList="getDataList"/>
       </el-col>
     </el-row>
   </div>
@@ -195,14 +208,67 @@
 
 <script>
 import { getOrderListByAdmin } from '../../../api/userApi'
+
 export default {
-  components: {
-  },
+  components: {},
   data() {
     return {
+      pickerOptions: {
+        shortcuts: [{
+          text: '今天',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近一周',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 7)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近一个月',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 30)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近三个月',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近半年',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 180)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近一年',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 365)
+            picker.$emit('pick', [start, end])
+          }
+        }
+        ]
+      },
       queryForm: {
         type: '',
-        userName: ''
+        userName: '',
+        createTime: ''
       },
       dataList: [],
       pageIndex: 1,
@@ -211,14 +277,14 @@ export default {
       dataListLoading: false,
       dataListSelections: [],
       addOrUpdateVisible: false,
-      activeName:'9',
+      activeName: '9',
       rule: {
         type: [
           { required: true, message: '必选', trigger: 'blur' }
         ],
         userName:
-          [{ required: true, message: '必填', trigger: 'blur' }
-          ]
+                        [{ required: true, message: '必填', trigger: 'blur' }
+                        ]
       },
       array: [
         { id: 0, name: '车牌号' },
@@ -234,30 +300,28 @@ export default {
   },
   methods: {
     toQuery() {
-      this.$refs['queryForm'].validate((valid) => {
-        if (valid) {
-          this.dataListLoading = true
-          const params = {
-            page: this.pageIndex,
-            size: this.pageSize
-          }
-          if (this.queryForm.type === 0) {
-            params.carNumber = this.queryForm.userName
-          } else {
-            params.userName = this.queryForm.userName
-          }
-          getOrderListByAdmin(params).then(res => {
-            console.log(res)
-            if (res.code === 200) {
-              this.dataList = res.data.list
-              this.totalPage = res.data.total
-            } else {
-              this.dataList = []
-              this.totalPage = 0
-            }
-            this.dataListLoading = false
-          })
+      this.dataListLoading = true
+      const params = {
+        page: this.pageIndex,
+        size: this.pageSize
+      }
+      if (this.queryForm.type === 0) {
+        params.carNumber = this.queryForm.userName
+      } else {
+        params.userName = this.queryForm.userName
+      }
+      if (this.queryForm.createTime != '') {
+        params.createTime = JSON.stringify(this.queryForm.createTime)
+      }
+      getOrderListByAdmin(params).then(res => {
+        if (res.code === 200) {
+          this.dataList = res.data.list
+          this.totalPage = res.data.total
+        } else {
+          this.dataList = []
+          this.totalPage = 0
         }
+        this.dataListLoading = false
       })
     },
     getOrderDetail(e) {
@@ -268,7 +332,7 @@ export default {
       const params = {
         page: this.pageIndex,
         size: this.pageSize,
-        payStatus:e
+        payStatus: e
       }
       getOrderListByAdmin(params).then(res => {
         console.log(res)
@@ -345,7 +409,8 @@ export default {
             this.$message.error(data.msg)
           }
         })
-      }).catch(() => {})
+      }).catch(() => {
+      })
     }
   }
 }

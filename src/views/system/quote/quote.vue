@@ -51,10 +51,26 @@
             align="center"
           />
           <el-table-column
+            prop="createdTime"
+            header-align="center"
+            align="center"
+            width="180"
+            label="创建时间"
+          >
+            <template slot-scope="scope">
+              {{ util.formatTime(scope.row.createdTime) }}
+            </template>
+          </el-table-column>
+          <el-table-column
             prop="carNumber"
             header-align="center"
             align="center"
             label="车牌号"
+          /><el-table-column
+            prop="licenseOwner"
+            header-align="center"
+            align="center"
+            label="车主"
           />
           <el-table-column
             prop="frameNumber"
@@ -131,17 +147,6 @@
             width="90"
           />
           <el-table-column
-            prop="createdTime"
-            header-align="center"
-            align="center"
-            width="180"
-            label="创建时间"
-          >
-            <template slot-scope="scope">
-              {{ util.formatTime(scope.row.createdTime) }}
-            </template>
-          </el-table-column>
-          <el-table-column
             fixed="right"
             header-align="center"
             align="center"
@@ -213,6 +218,14 @@ export default {
     return {
       pickerOptions: {
         shortcuts: [{
+          text: '今天',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
           text: '最近一周',
           onClick(picker) {
             const end = new Date()
@@ -236,7 +249,24 @@ export default {
             start.setTime(start.getTime() - 3600 * 1000 * 24 * 90)
             picker.$emit('pick', [start, end])
           }
-        }]
+        }, {
+          text: '最近半年',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 180)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
+          text: '最近一年',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 365)
+            picker.$emit('pick', [start, end])
+          }
+        }
+        ]
       },
       dataForm: {
         userName: ''

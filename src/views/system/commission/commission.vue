@@ -12,7 +12,7 @@
               inactive-text="关闭"
               active-value="1"
               inactive-value="2"
-              @change="updateValue" />
+              @change="updateValue"/>
           </el-form-item>
           <div style="display: inline-block;margin: 0px 2px;">
             <el-button
@@ -123,6 +123,11 @@
             </el-table>
           </el-tab-pane>
           <el-tab-pane label="历史佣金" name="2">
+            <el-form ref="queryForm">
+              <el-form-item>
+                <el-button :disabled="dataListSelections.length <= 0" type="danger" @click="deleteHandle()">批量删除</el-button>
+              </el-form-item>
+            </el-form>
             <el-table
               v-loading="dataListLoading"
               :data="comList"
@@ -130,6 +135,12 @@
               style="width: 100%;"
               @selection-change="selectionChangeHandle"
             >
+              <el-table-column
+                type="selection"
+                header-align="center"
+                align="center"
+                width="50"
+              />
               <el-table-column
                 prop="createTime"
                 header-align="center"
@@ -195,7 +206,27 @@
                 align="center"
                 label="二级提成"
               />
-
+              <el-table-column
+                fixed="right"
+                header-align="center"
+                align="center"
+                width="150"
+                label="操作"
+              >
+                <template slot-scope="scope">
+                  <el-popover
+                    :ref="scope.row.id"
+                    placement="top"
+                    width="160">
+                    <p>确定删除吗？</p>
+                    <div style="text-align: right; margin: 0">
+                      <el-button size="mini" type="text" @click="$refs[scope.row.id].doClose()">取消</el-button>
+                      <el-button type="primary" size="mini" @click="del(scope.row.id)">确定</el-button>
+                    </div>
+                    <el-button slot="reference" type="danger" size="small" icon="el-icon-delete" @click="visible=true"/>
+                  </el-popover>
+                </template>
+              </el-table-column>
               <!--<el-table-column-->
               <!--fixed="right"-->
               <!--header-align="center"-->
@@ -239,7 +270,14 @@
 </template>
 
 <script>
-import { commissionList, deleteUser, getCommissionListByDay, getShowToday, updateShowToday, getRole } from '../../../api/userApi'
+import {
+  commissionList,
+  deleteUser,
+  getCommissionListByDay,
+  getShowToday,
+  updateValue,
+  getRole, deleteCommissionListByDay, deletesSomeCommissionListByDay
+} from '../../../api/userApi'
 import addOrUpdate from './add-or-update'
 
 export default {
@@ -274,6 +312,23 @@ export default {
     this.getCommissionList()
   },
   methods: {
+    del(e) {
+      const params = {
+        id: e
+      }
+      deleteCommissionListByDay(params).then(res => {
+        if (res.code === 200) {
+          this.$notify({
+            title: '操作成功',
+            type: 'success'
+          })
+          this.$refs[e].doClose()
+          this.getCommissionListByDay()
+        } else {
+          this.$message.error(res.data)
+        }
+      })
+    },
     getCommissionListByDay() {
       const params = {
         page: this.pageIndex,
@@ -307,14 +362,12 @@ export default {
       })
     },
     updateValue(e) {
-      console.log(e)
       this.dataListLoading = true
       const params = {
-        id: 1,
-        value: e
+        paramKey: 'showToday',
+        paramValue: e
       }
-      updateShowToday(params).then(res => {
-        console.log(res)
+      updateValue(params).then(res => {
         if (res.code === 200) {
           this.$message({
             message: '成功',
@@ -332,10 +385,10 @@ export default {
     updateRole(e) {
       this.dataListLoading = true
       const params = {
-        id: 2,
-        value: this.value
+        paramKey: 'role',
+        paramValue: this.value
       }
-      updateShowToday(params).then(res => {
+      updateValue(params).then(res => {
         if (res.code === 200) {
           this.$message({
             message: '成功',
@@ -354,11 +407,10 @@ export default {
     getShowToday() {
       const params = {}
       getShowToday(params).then(res => {
-        console.log(res)
         this.showTodayComm = res.data
         /* if (res.code === 200) {
-        } else {
-        }*/
+                    } else {
+                    }*/
       })
     },
     showDialog() {
@@ -403,27 +455,24 @@ export default {
     },
     // 删除
     deleteHandle(id) {
-      var userIds = id ? [id] : this.dataListSelections.map(item => {
-        return item.accountId
+      var ids = id ? [id] : this.dataListSelections.map(item => {
+        return item.id
       })
-      console.log(id)
-      console.log(userIds)
       this.$confirm(`确认删除?`, '提示', {
         confirmButtonText: '确定',
         cancelButtonText: '取消',
         type: 'warning'
       }).then(() => {
         const params = {
-          accountId: userIds.join(','),
-          status: 1
+          id: ids.join(',')
         }
-        deleteUser(params).then(res => {
+        deletesSomeCommissionListByDay(params).then(res => {
           if (res.code === 200) {
             this.$message({
               message: '操作成功',
               type: 'success'
             })
-            this.getUserList()
+            this.getCommissionListByDay()
           } else {
             this.$message.error(res.data)
           }

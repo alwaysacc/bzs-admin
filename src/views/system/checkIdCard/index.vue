@@ -38,7 +38,7 @@
             prop="user_name"
             header-align="center"
             align="center"
-            label="姓名"
+            label="申请人"
           />
           <el-table-column
             prop="mobile"
@@ -80,6 +80,32 @@
               <img :src="scope.row.back_path" min-width="70" height="70">
             </template>
           </el-table-column>
+          <el-table-column
+            prop="name"
+            header-align="center"
+            align="center"
+            label="姓名"
+          />
+          <el-table-column
+            prop="bankNumber"
+            header-align="center"
+            align="center"
+            label="银行卡号"
+            min-width="120"
+          />
+          <el-table-column
+            prop="bank"
+            header-align="center"
+            align="center"
+            label="开户行"
+          />
+          <el-table-column
+            prop="bankAddress"
+            header-align="center"
+            align="center"
+            label="开户行地址"
+            min-width="120"
+          />
           <el-table-column
             prop="createdTime"
             header-align="center"

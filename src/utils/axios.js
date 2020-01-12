@@ -5,8 +5,8 @@ import NProgress from 'nprogress' // progress bar
 import 'nprogress/nprogress.css'// progress bar style
 axios.defaults.timeout = 100000
 axios.defaults.headers.post['Content-Type'] = 'application/x-www-form-urlencoded'
-// axios.defaults.baseURL = 'https://baozhishun.com/api'
-axios.defaults.baseURL = 'http://127.0.0.1:8082/'
+axios.defaults.baseURL = 'https://baozhishun.com/api'
+// axios.defaults.baseURL = 'http://127.0.0.1:8082/'
 // axios.defaults.baseURL = process.env.BASE_API
 export default {
   fetchGet(url, params = {}) {

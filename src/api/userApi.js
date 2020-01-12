@@ -92,6 +92,12 @@ export const commissionList = (params) => {
 export const getCommissionListByDay = (params) => {
   return http.fetchPost('/commission/every/day/list', params)
 }
+export const deleteCommissionListByDay = (params) => {
+  return http.fetchPost('/commission/every/day/delete', params)
+}
+export const deletesSomeCommissionListByDay = (params) => {
+  return http.fetchPost('/commission/every/day/deleteSome', params)
+}
 export const updateCommission = (params) => {
   return http.fetchPost('/commission/percentage/update', params)
 }
@@ -105,16 +111,22 @@ export const getRole = (params) => {
   return http.fetchPost('/sys/param/getRole', params)
 }
 
-export const updateShowToday = (params) => {
+export const updateValue = (params) => {
   return http.fetchPost('/sys/param/update', params)
 }
+export const sysDetail = (params) => {
+  return http.fetchPost('/sys/param/detail', params)
+}
 
-//消息
+// 消息
 export const addMessage = (params) => {
   return http.fetchPost('/message/add', params)
 }
 export const getMessageList = (params) => {
   return http.fetchPost('/message/list', params)
+}
+export const delMessage = (params) => {
+  return http.fetchPost('/message/del', params)
 }
 // 菜单
 export const getMenuByAdminName = (params) => {
@@ -177,4 +189,26 @@ export const addSwiper = (params) => {
 }
 export const deleteSwiper = (params) => {
   return http.fetchPost('/swiper/delete', params)
+}
+
+export const getFeedbackList = (params) => {
+  return http.fetchPost('/feedback/list', params)
+}
+export const updateFeedback = (params) => {
+  return http.fetchPost('/feedback/update', params)
+}
+export const deleteFeedback = (params) => {
+  return http.fetchPost('/feedback/delete', params)
+}
+export const getPartnerList = (params) => {
+  return http.fetchPost('/partner/info/list', params)
+}
+export const addPartner = (params) => {
+  return http.fetchPost('/partner/info/add', params)
+}
+export const delPartner = (params) => {
+  return http.fetchPost('/partner/info/delete', params)
+}
+export const updatePartner = (params) => {
+  return http.fetchPost('/partner/info/update', params)
 }

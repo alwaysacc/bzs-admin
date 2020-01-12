@@ -61,7 +61,6 @@ export default {
   },
   mounted() {
     getHomeInfo().then(res => {
-      console.log(res)
       if (res.code === 200) {
         this.count.orderCount = res.data.orderCount
         this.count.quoteCount = res.data.quoteCount

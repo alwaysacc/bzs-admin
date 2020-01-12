@@ -68,12 +68,12 @@
           style="width: 100%;"
           @selection-change="selectionChangeHandle"
         >
-          <el-table-column
+         <!-- <el-table-column
             type="selection"
             header-align="center"
             align="center"
             width="50"
-          />
+          />-->
           <el-table-column
             type="index"
             width="50"

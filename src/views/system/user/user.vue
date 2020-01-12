@@ -58,6 +58,12 @@
                 <el-radio :label="2">待审核</el-radio>
               </el-radio-group>
             </el-form-item>
+            <el-form-item label="允许问题反馈" size="mini" prop="isFeedBack">
+              <el-radio-group v-model="dataForm.isFeedBack">
+                <el-radio :label="1">是</el-radio>
+                <el-radio :label="2">否</el-radio>
+              </el-radio-group>
+            </el-form-item>
           </el-form>
           <span slot="footer" class="dialog-footer">
             <el-button @click="dialog = false">取消</el-button>
@@ -171,6 +177,17 @@
           >
             <template slot-scope="scope">
               {{ util.formatTime(scope.row.CREATED_TIME) }}
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="status"
+            header-align="center"
+            align="center"
+            label="允许问题反馈"
+          >
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.isFeedBack == 1" size="small">是</el-tag>
+              <el-tag v-else size="small" type="danger">否</el-tag>
             </template>
           </el-table-column>
           <el-table-column

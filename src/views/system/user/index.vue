@@ -96,6 +96,17 @@
             </template>
           </el-table-column>
           <el-table-column
+            prop="status"
+            header-align="center"
+            align="center"
+            label="是否允许问题反馈"
+          >
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.accountState === '1'" size="small" type="danger">否</el-tag>
+              <el-tag v-else size="small">是</el-tag>
+            </template>
+          </el-table-column>
+          <el-table-column
             prop="CREATED_TIME"
             header-align="center"
             align="center"

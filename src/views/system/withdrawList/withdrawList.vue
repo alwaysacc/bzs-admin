@@ -51,14 +51,6 @@
             label="ID"
           />
           <el-table-column
-            fixed="left"
-            prop="user_name"
-            header-align="center"
-            align="center"
-            label="姓名"
-            width="80"
-          />
-          <el-table-column
             prop="verification_by"
             header-align="center"
             align="center"
@@ -69,6 +61,14 @@
               {{ util.formatTime(scope.row.create_time) }}
             </template>
           </el-table-column>
+          <el-table-column
+            fixed="left"
+            prop="user_name"
+            header-align="center"
+            align="center"
+            label="姓名"
+            width="80"
+          />
           <el-table-column
             prop="car_number"
             header-align="center"
@@ -88,7 +88,7 @@
             label="车牌号"
           />
           <el-table-column
-            prop="car_number"
+            prop="license_owner"
             header-align="center"
             align="center"
             label="车主"
@@ -281,6 +281,14 @@ export default {
     return {
       pickerOptions: {
         shortcuts: [{
+          text: '今天',
+          onClick(picker) {
+            const end = new Date()
+            const start = new Date()
+            start.setTime(start.getTime() - 3600 * 1000 * 24 * 1)
+            picker.$emit('pick', [start, end])
+          }
+        }, {
           text: '最近一周',
           onClick(picker) {
             const end = new Date()
