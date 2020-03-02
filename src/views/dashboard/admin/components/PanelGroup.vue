@@ -44,6 +44,29 @@
         </div>
       </div>
     </el-col>
+
+    <el-col :xs="12" :sm="12" :lg="12" class="card-panel-col">
+      <div class="card-panel">
+        <div class="card-panel-icon-wrapper icon-money">
+          <svg-icon icon-class="visits" class-name="card-panel-icon" />
+        </div>
+        <div class="card-panel-description">
+          <div class="card-panel-text">总出单数</div>
+          <count-to :start-val="0" :end-val="count.okCount" :duration="3200" class="card-panel-num"/>
+        </div>
+      </div>
+    </el-col>
+    <el-col :xs="12" :sm="12" :lg="12" class="card-panel-col">
+      <div class="card-panel">
+        <div class="card-panel-icon-wrapper icon-shopping">
+          <svg-icon icon-class="ipvisits" class-name="card-panel-icon" />
+        </div>
+        <div class="card-panel-description">
+          <div class="card-panel-text">消息发送数</div>
+          <count-to :start-val="0" :end-val="count.msgCount" :duration="3600" class="card-panel-num"/>
+        </div>
+      </div>
+    </el-col>
   </el-row>
 </template>
 
@@ -56,7 +79,7 @@ export default {
   },
   data() {
     return {
-      count: { orderCount: 0, quoteCount: 0, todayCount: 0, userCount: 0 }
+      count: { orderCount: 0, quoteCount: 0, todayCount: 0, userCount: 0, okCount: 0, msgCount: 0 }
     }
   },
   mounted() {
@@ -66,6 +89,8 @@ export default {
         this.count.quoteCount = res.data.quoteCount
         this.count.todayCount = res.data.todayCount
         this.count.userCount = res.data.userCount
+        this.count.msgCount = res.data.msgCount
+        this.count.okCount = res.data.okCount
       }
     })
     /*    get().then(res => {

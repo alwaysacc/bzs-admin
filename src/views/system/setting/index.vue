@@ -135,7 +135,7 @@
             label="ID"
           />
           <el-table-column
-            prop="content"
+            prop="title"
             header-align="center"
             align="center"
             label="标题"
@@ -180,7 +180,7 @@
             prop="pay_status"
             header-align="center"
             align="center"
-            label="订单状态"
+            label="状态"
           >
             <template slot-scope="scope">
               <el-tag v-if="scope.row.status === 0" size="small" type="warning">待回复</el-tag>
@@ -516,6 +516,7 @@ export default {
           this.dataListLoading = true
           const param = this.form4
           delete param.createTime
+          delete param.updateTime
           param.status = 1
           updateFeedback(param).then(res => {
             if (res.code === 200) {

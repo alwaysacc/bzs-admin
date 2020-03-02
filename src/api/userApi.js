@@ -212,3 +212,16 @@ export const delPartner = (params) => {
 export const updatePartner = (params) => {
   return http.fetchPost('/partner/info/update', params)
 }
+
+export const getHeadlinesList = (params) => {
+  return http.fetchPost('/headlines/list', params)
+}
+export const addHeadlines = (params) => {
+  return http.fetchPost('/headlines/add', params)
+}
+export const delHeadlines = (params) => {
+  return http.fetchPost('/headlines/delete', params)
+}
+export const updateHeadlines = (params) => {
+  return http.fetchPost('/headlines/update', params)
+}

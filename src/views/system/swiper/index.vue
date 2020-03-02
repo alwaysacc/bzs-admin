@@ -42,6 +42,10 @@
             <el-form-item label="排序" prop="orderNum">
               <el-input v-model="dataForm.orderNum" placeholder="排序，0-999" />
             </el-form-item>
+            <el-form-item label="类型">
+              <el-radio v-model="dataForm.type" label="0">首页</el-radio>
+              <el-radio v-model="dataForm.type" label="1">车险</el-radio>
+            </el-form-item>
             <!--<el-form-item label="角色" size="mini" prop="roleIdList">
               <el-checkbox-group v-model="dataForm.roleIdList">
                 <el-checkbox v-for="role in roleList" :key="role.roleId" :label="role.roleId">{{ role.roleName }}</el-checkbox>
@@ -80,6 +84,17 @@
           >
             <template slot-scope="scope">
               <img :src="scope.row.imgUrl" min-width="70" height="70">
+            </template>
+          </el-table-column>
+          <el-table-column
+            prop="imgUrl"
+            header-align="center"
+            align="center"
+            label="类型"
+          >
+            <template slot-scope="scope">
+              <el-tag v-if="scope.row.type === 0" size="small" type="success" >首页</el-tag>
+              <el-tag v-else-if="scope.row.type === 1" size="small">车险</el-tag>
             </template>
           </el-table-column>
           <el-table-column
@@ -136,7 +151,8 @@ export default {
       dataForm: {
         orderNum: '',
         isShow: '',
-        imgUrl: ''
+        imgUrl: '',
+        type: '0'
       },
       queryForm: {
         type: '',
@@ -173,7 +189,6 @@ export default {
   },
   methods: {
     submitUpload() {
-      console.log(this.dataForm)
       this.$refs['dataForm'].validate((valid) => {
         if (valid) {
           if (!this.uploadStat) {
@@ -189,7 +204,6 @@ export default {
       })
     },
     onSuccess(response, file, fileList) {
-      console.log(response)
       if (response.code === 200) {
         this.$notify({
           title: '上传成功',
